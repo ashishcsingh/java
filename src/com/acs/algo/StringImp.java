@@ -1,38 +1,21 @@
 package com.acs.algo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 
 public class StringImp {
+	
 	/**
-	 * First skip spaces then skip all non-spaces then increase count until end of length.
-	 * @param words
+	 * a+b* validates aaab, aaabbbbb, a
+	 * @param regex
+	 * @param str
 	 * @return
 	 */
-	public static int countWords(char[] words) {
-		int i = 0;
-		if (words == null) {
-			throw new IllegalArgumentException("Null String");
-		}
-		int count = 0;
-		while (i < words.length) {
-			// Skip spaces.
-			while (i < words.length && words[i] == ' ') {
-				i++;
-			}
-			// Skip non spaces and increase count.
-			if (i < words.length) {
-				while (i < words.length && words[i] != ' ') {
-					i++;
-				}
-				count++;
-			}
-		}
-		return count;
-	}
-	
 	public static boolean validateSimpleRegex(char[] regex, char[] str) {
 		if (regex == null || str == null) {
 			throw new IllegalArgumentException("Null String");
@@ -126,7 +109,46 @@ public class StringImp {
 		}
 	}
 	
+	
+	/**
+	 * First skip spaces then skip all non-spaces then increase count until end of length.
+	 * @param words
+	 * @return
+	 */
+	public static int countWords(char[] words) {
+		int i = 0;
+		if (words == null) {
+			throw new IllegalArgumentException("Null String");
+		}
+		int count = 0;
+		while (i < words.length) {
+			// Skip spaces.
+			while (i < words.length && words[i] == ' ') {
+				i++;
+			}
+			// Skip non spaces and increase count.
+			if (i < words.length) {
+				while (i < words.length && words[i] != ' ') {
+					i++;
+				}
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * Count unique words using hashset.
+	 * @param words
+	 * @return
+	 */
+	public static int countUniqueWords(String words) {
+		Set<String> set = new HashSet<>(Arrays.asList(words.split("\\s+")));
+		return set.size();
+	}
+	
 	public static void main(String[] args) {
+		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
 		assert countWords("".toCharArray()) == 0;
 		assert countWords("aa aa ".toCharArray()) == 2;
@@ -137,13 +159,14 @@ public class StringImp {
 		assert !validateSimpleRegex("A+B*".toCharArray(), "AAAABBBBBC".toCharArray());
 		assert !validateSimpleRegex("A?B*".toCharArray(), "AAAABBBBBC".toCharArray());
 		assert validateSimpleRegex("A*B*C?".toCharArray(), "AAAABBBBBC".toCharArray());
-		
 		System.out.println("Testing permutations of 'abc'");
 		for(String str: permutations("abc")) {
 			System.out.println(str);
 		}
-		
 		System.out.println("Testing parathesis of 3 length");
 		printParathesis(new char[6], 0, 3, 3);
+		System.out.println(countUniqueWords("that is that  is"));
+		assert countUniqueWords("the world the    world the") == 2 : "spaces are breaking";
+		System.out.println("Done: Testing String related puzzles");
 	}
 }

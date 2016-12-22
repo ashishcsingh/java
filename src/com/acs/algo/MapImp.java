@@ -63,7 +63,13 @@ public class MapImp {
 		return result;
 	}
 	
-	static int fibinocci(int n, Map<Integer, Integer> cache) {
+	/**
+	 * fibinocci using caching.
+	 * @param n
+	 * @param cache
+	 * @return
+	 */
+	public static int fibinocci(int n, Map<Integer, Integer> cache) {
 		if (cache.get(n) != null) {
 			return cache.get(n);
 		}
@@ -72,6 +78,55 @@ public class MapImp {
 		}
 		cache.put(n, fibinocci(n - 1, cache) + fibinocci(n - 2, cache));
 		return cache.get(n);
+	}
+	
+	/**
+	 *  Count Conversion int to char 121 => 3
+	 * @param digits
+	 * @param index
+	 * @return
+	 */
+	public static int countDigitToChars(int[] digits, int index) {
+		if (digits == null || index > digits.length) {
+			return 0;
+		}
+		if (index == digits.length) {
+			return 1;
+		}
+		int count = 0;
+		count += countDigitToChars(digits, index + 1) ;
+		if (index < digits.length - 1 && digits[index] <= 2 && digits[index+1] < 7) {
+			count += countDigitToChars(digits, index + 2);
+		}
+		return count;
+	}
+	
+	/**
+	 * Minimum coin denomination to reach a target.
+	 * @param cache
+	 * @param coins
+	 * @param sum
+	 * @return
+	 */
+	public static int minDenomination(Map<Integer, Integer> cache, int[] coins, int sum) {
+		if (cache == null || coins == null) {
+			throw new IllegalArgumentException("invalid params");
+		}
+		if (sum < 0) {
+			return Integer.MAX_VALUE - 1;
+		}
+		if (sum == 0) {
+			return 0;
+		}
+		if (cache.get(sum) != null) {
+			return cache.get(sum);
+		}
+		int result = Integer.MAX_VALUE - 1;
+		for (int coin: coins) {
+			result = Math.min(result, minDenomination(cache, coins, sum - coin) + 1);
+		}
+		cache.put(sum, result);
+		return result;
 	}
 	
 	@SuppressWarnings("serial")
@@ -86,9 +141,13 @@ public class MapImp {
 		}});
 		
 		// Coin flips Dynamic programming.
-		Map<Integer, Integer> cache = new HashMap<>();
-		int countFlips = coinDenominations(cache, new int[]{1, 2, 3}, 3);
+		int countFlips = coinDenominations(new HashMap<>(), new int[]{1, 2, 3}, 3);
 		System.out.println("Total count flips to sum 3 from 1,2,3 coins : " + countFlips);
+		int minCountFlips = minDenomination(new HashMap<>(), new int[]{1, 2, 3}, 10);
+		System.out.println("Minimum flips to sum 10 from 1,2,3 coins : " + minCountFlips);
+		//assert countDigitToChars(new int[] {1,2,1}, 0) == 3;
+		System.out.println(" 121 => Chars : " + countDigitToChars(new int[] {1, 2, 1}, 0));
+		
 		
 		assert Objects.equals(leastKRepeatedNum(new int[] {5, 6, 5, 6, 1, 2}, 2), new HashMap<Integer, Integer>(){
 		{
