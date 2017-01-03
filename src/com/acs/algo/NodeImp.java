@@ -13,16 +13,36 @@ public class NodeImp {
 	 *
 	 */
 	public static class Node {
-		Node left, right;
-		int data;
-		Node() {}
-		Node(int val) {
+		public Node left, right;
+		public int data;
+		public Node() {}
+		public Node(int val) {
 			this.data = val;
 		}
-		Node(Node l, Node r, int d) {
+		public Node(Node l, Node r, int d) {
 			left = l;
 			right = r;
 			data = d;
+		}
+	}
+	
+	public static class SingleNode {
+		SingleNode next;
+		int data;
+		public SingleNode(int data) {
+			this.data = data;
+		}
+		public SingleNode() {
+		}
+	}
+	
+	public static class DoubleNode {
+		DoubleNode next, prev;
+		int data;
+		public DoubleNode(int data) {
+			this.data = data;
+		}
+		public DoubleNode() {
 		}
 	}
 	
@@ -369,6 +389,162 @@ public class NodeImp {
 		return isSameTree(root.left) && isSameTree(root.right);
 	}
 	
+	/**
+	 * Add current node to end.
+	 * Detect child node and print path.
+	 * Remove last elem.
+	 * @param node
+	 * @param path
+	 */
+	public static void printPathToLeaf(Node node, LinkedList<Node> path) {
+		// Null check and return.
+		if (node == null) {
+			return;
+		}
+		// Add current node to path.
+		path.addLast(node);
+		// Detect child node and print path.
+		if (node.left == null && node.right == null) {
+			for (Node n: path) {
+				System.out.print(n.data + " ");
+			}
+			System.out.println();
+		}
+		// DFS.
+		printPathToLeaf(node.left, path);
+		printPathToLeaf(node.right, path);
+		// Remove the current elem.
+		path.removeLast();
+	}
+	
+	/**
+	 * Add last current node to currentPath.
+	 * If child node and maxPath.size() < currentPath.size() then maxPath = currentPath
+	 * DFS
+	 * Remove last current node from currentPath.
+	 * @param node
+	 * @param currentPath
+	 * @param maxPath
+	 */
+	public static void getLongestPath(Node node, LinkedList<Node> currentPath, LinkedList<Node> maxPath) {
+		// Null node return.
+		if (node == null) {
+			return;
+		}
+		// Add last current node to currentPath.
+		currentPath.addLast(node);
+		// Detect child and set max path if currentPath is bigger.
+		if (node.left == null && node.right == null) {
+			if (currentPath.size() > maxPath.size()) {
+				maxPath.clear();
+				maxPath.addAll(currentPath);
+			}
+		}
+		// DFS.
+		getLongestPath(node.left, currentPath, maxPath);
+		getLongestPath(node.right, currentPath, maxPath);
+		currentPath.removeLast();
+	}
+	
+	/**
+	 * Checks if a loop exists.
+	 * @param node
+	 * @return
+	 */
+	public static boolean hasLoop(SingleNode node) {
+		SingleNode fast = node, slow = node;
+		while (fast != null && fast.next != null && fast.next != null) {
+			fast = fast.next.next;
+			slow = slow.next;
+			if (slow == fast) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Finds the loop point if no loop then return null.
+	 * @param start
+	 * @return
+	 */
+	public static SingleNode getLoopPoint(SingleNode start) {
+		SingleNode slow = start, fast = start, meetingPoint = null;
+		while (fast != null && fast.next!= null) {
+			fast = fast.next.next;
+			slow = slow.next;
+			if (slow == fast) {
+				meetingPoint = fast;
+				break;
+			}
+		}
+		if (meetingPoint != null) {
+			slow = start;
+			while (slow != meetingPoint) {
+				slow = slow.next;
+				meetingPoint = meetingPoint.next;
+			}		
+		}
+		return meetingPoint;
+	}
+	
+	/**
+	 * Check LinkedList is palindrome with no knowledge of length.
+	 * @param start
+	 * @return
+	 */
+	public static boolean isPalindrome(SingleNode start) {
+		// Null checks.
+		if (start == null || start.next == null) {
+			return true;
+		}
+		// Detect end while pushing content to stack.
+		Stack<Integer> stack = new Stack<>();
+		SingleNode slow = start, fast = start;
+		while (true) {
+			if (fast == null) {
+				break;
+			}
+			if (fast.next == null) {
+				slow = slow.next;
+				break;
+			}
+			stack.push(slow.data);
+			fast = fast.next.next;
+			slow = slow.next;
+		}
+		// Match stack's content with List.
+		while (!stack.isEmpty()) {
+			if (stack.peek() != slow.data) {
+				return false;
+			}
+			stack.pop();
+			slow = slow.next;
+		}
+		if (slow == null && stack.isEmpty()) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Reverses the linked list.
+	 * @param node
+	 * @return
+	 */
+	public static SingleNode reverseList(SingleNode node) {
+		if (node == null || node.next == null) {
+			return node;
+		}
+		SingleNode prev = null, next = node, base = node;
+		while (base != null) {
+			next = base.next;
+			base.next = prev;
+			prev = base;
+			base = next;
+		}
+		return prev;
+	}
 	
 	/**
 	 * Tester methods.
@@ -409,8 +585,44 @@ public class NodeImp {
 		System.out.println("Vertical ordering for serial tree");
 		System.out.println("Is serialized tree balanced: " + isBst(serialedNode));
 		verticalOrdering(serialedNode);
+		System.out.println("Path to leaf ");
+		printPathToLeaf(serialedNode, new LinkedList<>());
+		System.out.println("Longest Path to leaf ");
+		LinkedList<Node> maxPath = new LinkedList<>();
+		getLongestPath(serialedNode, new LinkedList<>(), maxPath);
+		for (Node n : maxPath) {
+			System.out.print(n.data + " ");
+		}
+		System.out.println();
+		
+		// 1 -> 2 -> 3 -> 4 ->
+		//      ^-  <-  <-|
+		SingleNode singleNode = new SingleNode(1);
+		singleNode.next = new SingleNode(2);
+		singleNode.next.next = new SingleNode(3);
+		singleNode.next.next.next = new SingleNode(4);
+		singleNode.next.next.next.next = singleNode.next;
+		System.out.println("Has Loop : " + hasLoop(singleNode));
+		System.out.println("Find Loop point : " + getLoopPoint(singleNode).data);
+		
+		
+		// 1 -> 2 -> 2 -> 1 : Yes!
+		SingleNode palindrome = new SingleNode(1);
+		palindrome.next = new SingleNode(2);
+		palindrome.next.next = new SingleNode(2);
+		palindrome.next.next.next = new SingleNode(1);
+		System.out.println("Is Palindrome: " + isPalindrome(palindrome));
+		
+		// 1 -> 2 -> 2 -> 1 -> 3 : No!
+		palindrome.next.next.next.next = new SingleNode(3);
+		System.out.println("Is Palindrome (no): " + isPalindrome(palindrome));
+		
+		// Check reversing module.
+		reverseList(palindrome);
+		assert palindrome.data == 3;
+		assert palindrome.next.data == 1;
+		
 		// Means no assert failure.
 		System.out.println("Done: Testing Graph related puzzles");
-		
 	}
 }

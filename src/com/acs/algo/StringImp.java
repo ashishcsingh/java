@@ -147,6 +147,26 @@ public class StringImp {
 		return set.size();
 	}
 	
+	/**
+	 * Is Palindrome
+	 * @param str
+	 * @return
+	 */
+	public static boolean isPalindrom(String str) {
+		if (str == null || str.length() == 1) {
+			return true;
+		}
+		int i = 0, j = str.length() - 1;
+		while ( i !=  j) {
+			if (str.charAt(i) != str.charAt(j)) {
+				return false;
+			}
+			i++;
+			j--;
+		}
+		return true;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -167,6 +187,9 @@ public class StringImp {
 		printParathesis(new char[6], 0, 3, 3);
 		System.out.println(countUniqueWords("that is that  is"));
 		assert countUniqueWords("the world the    world the") == 2 : "spaces are breaking";
+		String palindromeData = "abcdcba";
+		System.out.println("is Palindrom " + palindromeData + " : " + isPalindrom(palindromeData));
+		
 		System.out.println("Done: Testing String related puzzles");
 	}
 }
