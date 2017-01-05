@@ -63,7 +63,7 @@ public class AbstractFactory {
 	
 	static abstract class AbstractDisplayFactory {
 		public abstract Shape getShape(String type);
-		public abstract Color getColor(String typeß);
+		public abstract Color getColor(String type);
 	}
 	
 	// ShapeFactory is a factory pattern that creates concrete instances.

@@ -33,6 +33,7 @@ public class Adapter {
 		}
 		// Riding fulfills drive requirements.
 		@Override
+		
 		public void drive() {
 			bike.Ride();
 		}
