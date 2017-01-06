@@ -1,7 +1,7 @@
 package com.acs.data;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JDK compliant HashMap get(), put(), entrySet() and keySet() implementations.
@@ -10,13 +10,13 @@ import java.util.TreeSet;
  * @param <K>
  * @param <V>
  */
-public class HashMap<K extends Comparable, V> implements Map<K, V> {
+public class HashMap<K, V> implements Map<K, V> {
 	private final int INTIAL_CAPACITY = 16;
 	private int capacity = INTIAL_CAPACITY;
 	private Node<K, V>[] table;
 	private int count;
-	private Set<K> keySet = new TreeSet<>();
-	private Set<Map.Entry<K, V>> entrySet = new TreeSet<>();
+	private List<K> keyList = new ArrayList<>();
+	private ArrayList<Map.Entry<K, V>> entryList = new ArrayList<>();
 
 	private static int hashKey(Object key) {
 		int h;
@@ -53,8 +53,8 @@ public class HashMap<K extends Comparable, V> implements Map<K, V> {
 
 	private Node<K, V> createNode(K key, V value) {
 		Node<K, V> node = new Node<>(hashKey(key), key, value);
-		keySet.add(key);
-		entrySet.add(node);
+		keyList.add(key);
+		entryList.add(node);
 		count++;
 		return node;
 	}
@@ -65,7 +65,7 @@ public class HashMap<K extends Comparable, V> implements Map<K, V> {
 	}
 
 	@SuppressWarnings("hiding")
-	private class Node<K extends Comparable, V> implements Map.Entry<K, V> {
+	private class Node<K, V> implements Map.Entry<K, V> {
 		K key;
 		V value;
 		int hash;
@@ -103,17 +103,11 @@ public class HashMap<K extends Comparable, V> implements Map<K, V> {
 			this.value = value;
 			return value;
 		}
-
-		@Override
-		public int compareTo(Entry<K,V> o) {
-			return o.getKey().compareTo(o.getKey());
-		}
-
 	}
 
 	@Override
-	public Set<Map.Entry<K, V>> entrySet() {
-		return entrySet;
+	public List<Map.Entry<K, V>> entryList() {
+		return entryList;
 	}
 
 	@Override
@@ -148,8 +142,8 @@ public class HashMap<K extends Comparable, V> implements Map<K, V> {
 	}
 
 	@Override
-	public Set<K> keySet() {
-		return keySet;
+	public List<K> keyList() {
+		return keyList;
 	}
 	
 	public static void main(String[] args) {
@@ -162,5 +156,8 @@ public class HashMap<K extends Comparable, V> implements Map<K, V> {
 		assert map.get(2).equals("Two");
 		assert map.get(3).equals("Three");
 		assert map.get(4) == null;
+		for (Map.Entry<Integer, String> entry : map.entryList()) {
+			System.out.println(" Key : " + entry.getKey() + " , value : " + entry.getValue());
+		}
 	}
 }
