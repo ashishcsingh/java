@@ -167,6 +167,102 @@ public class StringImp {
 		return true;
 	}
 	
+	/**
+	 * Trie datastructure.
+	 * @author asingh
+	 *
+	 */
+	public static class Trie {
+		private static class TNode {
+			public TNode[] child;
+			public boolean isWord;
+		}
+		private TNode root = new TNode();
+		
+		/**
+		 * Train Trie.
+		 * @param words
+		 */
+		public void init(String[] words) {
+			for (String word: words) {
+				TNode node = root;
+				for (char c : word.toCharArray()) {
+					if (node.child == null) {
+						node.child = new TNode[26];
+					}
+					if (node.child[c - 'a'] == null) {
+						node.child[c - 'a'] = new TNode();
+					}
+					node = node.child[c - 'a'];
+				}
+				node.isWord = true;
+			}
+		}
+		
+
+		/**
+		 * Matches with exact word
+		 * @param word
+		 * @param index
+		 * @param node
+		 * @return
+		 */
+		private boolean exists(String word) {
+			if (word == null || "".equals(word) || !word.matches("[a-z]*")) {
+				throw new IllegalArgumentException();
+			}
+			return exists(word.toCharArray(), 0, root);
+		}
+		
+		private boolean exists(char[] word, int index, TNode node) {
+			if (node == null) {
+				return false;
+			}
+			if (word.length == index && node.isWord) {
+				return true;
+			}
+			if (node.child == null || word.length <= index) {
+				return false;
+			}
+			return exists(word, index + 1, node.child[word[index] - 'a']);
+		}
+		
+		/**
+		 * Matches fo.d ==> food, foed etc.
+		 * @param word
+		 * @return
+		 */
+		public boolean existsWithDot(String word) {
+			if (word == null || "".equals(word) || !word.matches("[.a-z]*")) {
+				throw new IllegalArgumentException();
+			}
+			return existsWithDot(word.toCharArray(), 0, root);
+		}
+		
+		private boolean existsWithDot(char[] word, int index, TNode node) {
+			if (node == null) {
+				return false;
+			}
+			if (word.length == index && node.isWord) {
+				return true;
+			}
+			if (node.child == null || word.length <= index) {
+				return false;
+			}
+			if (word[index] == '.') {
+				for (int i=0; i<26; i++) {
+					if (existsWithDot(word, index + 1, node.child[i])) {
+						return true;
+					}
+				}
+				return false;
+			} else {
+				return existsWithDot(word, index + 1, node.child[word[index] - 'a']);
+			}
+		}
+		
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -190,6 +286,16 @@ public class StringImp {
 		String palindromeData = "abcdcba";
 		System.out.println("is Palindrom " + palindromeData + " : " + isPalindrom(palindromeData));
 		
+		Trie trie = new Trie();
+		trie.init(new String[] { "food", "drink" });
+		assert trie.exists("food");
+		assert trie.exists("drink");
+		assert trie.exists("drinsk") == false;
+		assert trie.existsWithDot("food");
+		assert trie.existsWithDot("foo.");
+		assert trie.existsWithDot("drin.");
+		assert trie.existsWithDot("foa") == false;
+		assert trie.existsWithDot("fo") == false;
 		System.out.println("Done: Testing String related puzzles");
 	}
 }
