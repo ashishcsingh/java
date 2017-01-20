@@ -2,8 +2,10 @@ package com.acs.algo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
@@ -145,6 +147,47 @@ public class StringImp {
 	public static int countUniqueWords(String words) {
 		Set<String> set = new HashSet<>(Arrays.asList(words.split("\\s+")));
 		return set.size();
+	}
+	
+	/**
+	 * compute word and count.
+	 * @param line
+	 * @return
+	 */
+	public static Map<String, Integer> countWords(String line) {
+		Map<String, Integer> wordMap = new HashMap<>();
+		String[] words = line.split("\\W");
+		for (String word : words) {
+			wordMap.put(word, wordMap.getOrDefault(word, 0) + 1);
+		}
+		return wordMap;
+	}
+	
+	/**
+	 * print each word seperated by line nos observed in document.
+	 * https://careercup.com/question?id=5742635739250688
+	 * @param document
+	 */
+	public static void printWordLineNumber(String document) {
+		Map<String, List<Integer>> outputMap = new HashMap<>();
+		String[] lines = document.split("\\n");
+		int lineCount = 1;
+		for(String line: lines) {
+			for(String word: line.split("\\W")) {
+				List<Integer> listLineNo = outputMap.get(word);
+				if (listLineNo == null) {
+					listLineNo = new ArrayList<>();
+					outputMap.put(word, listLineNo);	
+				}
+				outputMap.get(word).add(lineCount);
+			}
+			lineCount++;
+		}
+		for(Map.Entry<String, List<Integer>> e : outputMap.entrySet()) {
+			System.out.print(e.getKey());
+			e.getValue().forEach( lineNo -> System.out.print(" " + lineNo));
+			System.out.println();
+		}
 	}
 	
 	/**
@@ -296,6 +339,14 @@ public class StringImp {
 		assert trie.existsWithDot("drin.");
 		assert trie.existsWithDot("foa") == false;
 		assert trie.existsWithDot("fo") == false;
+		
+		System.out.println("CountWords for 'Hello World Hello'");
+		Map<String, Integer> wordCount = countWords("Hello World Hello");
+		wordCount.entrySet().forEach(System.out::println);
+		
+		String document = "some \n hello \n some hello";
+		printWordLineNumber(document);
+		
 		System.out.println("Done: Testing String related puzzles");
 	}
 }
