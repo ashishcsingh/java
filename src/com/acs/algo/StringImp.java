@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import com.google.common.collect.ImmutableList;
 
@@ -306,6 +307,84 @@ public class StringImp {
 		
 	}
 	
+	static class WordNode {
+		Set<WordNode> neighbors = new HashSet<>();
+		String word;
+		WordNode(String word) {
+			this.word = word;
+		}
+	}
+	
+	/**
+	 * Prints path from start word to end word with a jump of one char.
+	 * Build graph of words and then DFS
+	 * @param start
+	 * @param end
+	 * @param dictionary
+	 */
+	public static void pathBetweenWords(String start, String end, String[] dictionary) {
+		WordNode root = buildGraph(start, dictionary);
+		System.out.println(dfsPathToWord(start, end, root));
+	}
+	
+	
+	private static WordNode buildGraph(String start, String[] dictionary) {
+		Map<String, WordNode> wordMap = new HashMap<>();
+		for (String word: dictionary) {
+			wordMap.put(word, new WordNode(word));
+		}
+		for (String word1: dictionary) {
+			for (String word2: dictionary) {
+				if (word1.equals(word2)) {
+					continue;
+				}
+				if (isAlphabetApart(word1, word2)) {
+					wordMap.get(word1).neighbors.add(wordMap.get(word2));
+				}
+			}
+		}
+		return wordMap.get(start);
+	}
+	
+	private static boolean isAlphabetApart(String word1, String word2) {
+		int diff = 0;
+		if (word1 == null || word2 == null) {
+			return false;
+		}
+		if (word1.length() != word2.length()) {
+			return false;
+		}
+		for(int i = 0; i < word1.length(); i++) {
+			if (word1.charAt(i) != word2.charAt(i)) {
+				diff++;
+			}
+			if (diff > 1) {
+				return false;
+			}
+		}
+		if (diff == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static List<String> dfsPathToWord(String start, String end, WordNode root) {
+		Stack<WordNode> stack = new Stack<>();
+		List<String> path = new ArrayList<>();
+		stack.push(root);
+		Set<WordNode> visited = new HashSet<>();
+		while(!stack.isEmpty()) {
+			WordNode current = stack.pop();
+			if (visited.contains(current)) {
+				continue;
+			}
+			stack.addAll(current.neighbors);
+			path.add(current.word);
+			visited.add(current);
+		}
+		return path;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -346,6 +425,15 @@ public class StringImp {
 		
 		String document = "some \n hello \n some hello";
 		printWordLineNumber(document);
+		
+		
+		//Input:  Dictionary = {POON, PLEE, SAME, POIE, PLEA, PLIE, POIN}
+        //start = TOON
+        //target = PLEA
+		//Output: 7
+		//Explanation: TOON - POON - POIN - POIE - PLIE - PLEE - PLEA
+		String[] dictionary = {"TOON", "POON", "PLEE", "SAME", "POIE", "PLEA", "PLIE", "POIN"};
+		pathBetweenWords("TOON", "PLEA", dictionary);
 		
 		System.out.println("Done: Testing String related puzzles");
 	}
