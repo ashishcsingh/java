@@ -1,10 +1,16 @@
 package com.acs.algo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.Stack;
 
 public class NodeImp {
@@ -547,6 +553,77 @@ public class NodeImp {
 	}
 	
 	/**
+	 * Dedup Contacts with common emails
+	 * Build hashMap email to contact.
+	 * for c : contacts
+	 *   if (c in visitedContacts)
+	 *       continue;
+	 * 	 setContacts = dfs(contact)
+	 *   print setContacts
+	 *   visitedContacts.remove(setContacts)
+	 *    
+	 */
+	public static void dedupContacts(Map<String, List<String>> contactToEmails) {
+		Map<String, List<String>> emailToContacts = buildEmailToContact(contactToEmails);
+		Set<String> visitedContacts = new HashSet<>();
+		for (String contact : contactToEmails.keySet()) {
+			// Skip contact that is already visited.
+			if (visitedContacts.contains(contact)) {
+				continue;
+			}
+			// Print all next connectedContacts.
+			Set<String> connectedContacts = dfsContacts(contact, contactToEmails, emailToContacts);
+			System.out.println(connectedContacts);
+			visitedContacts.addAll(connectedContacts);
+		}
+	}
+	
+	/**
+	 * For each contact, for each email, add contact -> email.
+	 * @param contactToEmails
+	 * @return
+	 */
+	private static Map<String, List<String>> buildEmailToContact(Map<String, List<String>> contactToEmails) {
+		Map<String, List<String>> emailToContacts = new HashMap<>();
+		for (Entry<String, List<String>> entry : contactToEmails.entrySet()) {
+			for (String email: entry.getValue()) {
+				emailToContacts.putIfAbsent(email, new ArrayList<String>());
+				emailToContacts.get(email).add(entry.getKey());
+			}
+		}
+		return emailToContacts;
+	}
+	
+	/**
+	 * Get all contacts that are connected.
+	 * @param contact
+	 * @param contactToEmails
+	 * @param emailToContacts
+	 * @return
+	 */
+	private static Set<String> dfsContacts(String contact, Map<String, List<String>> contactToEmails,
+			Map<String, List<String>> emailToContacts) {
+		Set<String> visited = new HashSet<>();
+		Stack<String> stack = new Stack<>();
+		stack.push(contact);
+		while(!stack.isEmpty()) {
+			// Get the depth first search.
+			String current = stack.pop();
+			// Skip visited nodes.
+			if (visited.contains(current)) {
+				continue;
+			}
+			// Get all connections.
+			for (String email : contactToEmails.get(current)) {
+				stack.addAll(emailToContacts.get(email));
+			}
+			// Mark current as visited to avoid looping.
+			visited.add(current);
+		}
+		return visited;
+	}
+
+	/**
 	 * Tester methods.
 	 * @param args
 	 */
@@ -621,6 +698,16 @@ public class NodeImp {
 		reverseList(palindrome);
 		assert palindrome.data == 3;
 		assert palindrome.next.data == 1;
+		
+		// Check dedupContacts
+		// c1..4 should one connected contact and c5 should be another set.
+		Map<String, List<String>> contactToEmails = new HashMap<>();
+		contactToEmails.put("c1", Arrays.asList("email1", "email2"));
+		contactToEmails.put("c2", Arrays.asList("email1", "email3"));
+		contactToEmails.put("c3", Arrays.asList("email3", "email6"));
+		contactToEmails.put("c4", Arrays.asList("email6", "email7"));
+		contactToEmails.put("c5", Arrays.asList("email8", "email9"));
+		dedupContacts(contactToEmails);
 		
 		// Means no assert failure.
 		System.out.println("Done: Testing Graph related puzzles");

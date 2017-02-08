@@ -1,8 +1,10 @@
 package com.acs.algo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class MapImp {	
 	public static Map<Integer, Integer> histogram(int... data) {
@@ -128,6 +130,12 @@ public class MapImp {
 		cache.put(sum, result);
 		return result;
 	}
+	
+	/*
+	public static List<List<String>> dedupeContacts(Map<String, Set<String>> contactEmailMap) {
+		Map<String, >
+	}
+	*/
 	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
