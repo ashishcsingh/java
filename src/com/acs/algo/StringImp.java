@@ -517,6 +517,46 @@ public class StringImp {
 		}
 	}
 	
+	/**
+	 * str can take 0..9 and +,-
+	 * ex. 43 + 12 - 3
+	 * @param str
+	 * @return
+	 */
+	public static int eval(String str) {
+		int result = 0;
+		boolean neg = false;
+		if (str.charAt(0) == '-') {
+			neg = true;
+		}
+		int current = 0;
+		for (char c: str.toCharArray()) {
+			switch(c) {
+			case ' ':
+				break;
+			case '+' : 
+				current = neg? -current : current;
+				result += current;
+				neg = false;
+				current = 0;
+				break;
+			case '-' :
+				current = neg? -current : current;
+				result += current;
+				neg = true;
+				current = 0;
+				break;
+			default:
+				current *= 10;
+				current += (c - '0');
+				break;
+			}
+		};
+		current = neg? -current : current;
+		result += current;
+		return result;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -576,8 +616,10 @@ public class StringImp {
 		assert isBreakable(test.toCharArray(), 0, size - 1, new boolean[size], new HashSet<>(Arrays.asList("good", "night", "sleep")));
 		assert isBreakable(test, 0, new boolean[size], new HashSet<>(Arrays.asList("good", "night", "sleep")));
 		
+		System.out.println("permutate with call stack ");
 		permutate("", "abc");
-
+		assert eval("12 + 5 - 5") == 12;
+		assert eval("-12 - 5 + 5 + 12") == 0;
 		System.out.println("Done: Testing String related puzzles");
 	}
 }
