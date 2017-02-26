@@ -2,6 +2,7 @@ package com.acs.algo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -231,6 +232,66 @@ public class ListImp {
 			bulbs[i] = !bulbs[i];
 		}
 	}
+	
+	public static class Segment {
+		public float start, end;
+		Segment(float start, float end) {
+			this.start = start;
+			this.end = end;
+		}
+		Segment() {}
+	};
+	
+	/**
+	 * Total watched time for a movie.
+	 * @param list  Time segments of movie
+	 * @return total time watched.
+	 */
+	public static float totalWatchedTime(List<Segment> list) {
+		if (list == null || list.size() < 1) {
+			throw new IllegalArgumentException();
+		}
+		Collections.sort(list, (s1, s2) -> (int) (s1.start - s2.start));
+		List<Segment> output = new ArrayList<>();
+		output.add(list.get(0));
+		for(int i = 1; i < list.size(); i++) {
+			Segment s1 = output.get(output.size() - 1);
+			Segment s2 = list.get(i);
+			// Check merge
+			if (s1.end > s2.start) {
+				output.set(output.size() - 1, new Segment(Math.min(s1.start, s2.start), Math.max(s1.end, s2.end)));
+			} else {
+				output.add(s2);
+			}
+		}
+		float total = 0;
+		for(Segment s : output) {
+			total += (s.end - s.start);
+		}
+		return total;
+	}
+	
+	/**
+	 * Simple Binary search.
+	 * @param data
+	 * @param search
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static boolean binarySearch(int[] data, int search, int start, int end) {
+		while (start < end) {
+			int mid = (start + end) / 2;
+			if (data[mid] < search) {
+				start = mid + 1;
+			} else if (data[mid] > search) {
+				end = mid - 1;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static void main(String[] args) {
 		// Test arrayUnique()
@@ -263,7 +324,13 @@ public class ListImp {
 		System.out.println("Reverse number : " + -321 + " is : " + reverseNum(-321));
 
 		assert bulbFlipper(5) == 2;
-
+		
+		assert binarySearch(new int[]{1, 2, 3, 4, 5 }, 3, 0, 5) : "Should be found";
+		assert binarySearch(new int[]{1, 2, 3, 4, 7 }, 5, 0, 5) == false : "Should not be found";
+	
+		assert (int) totalWatchedTime(Arrays.asList(new Segment(0.0f, 5.0f),
+				new Segment(3.0f, 8.0f), new Segment(9.0f, 12.0f))) == (int) 11.0f;
+		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
 	}

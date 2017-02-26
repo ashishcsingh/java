@@ -1,10 +1,13 @@
 package com.acs.algo;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class QueueImp {
 	
@@ -15,13 +18,16 @@ public class QueueImp {
 	 * @return
 	 */
 	public static int[] topN(int[] data, int n) {
-		PriorityQueue<Integer> pq = new PriorityQueue<>(n + 1, (a, b) -> a - b);
+		// By default it builds min heap based priority queue.
+		// n + 1, to prevent loss of any of the top N elements in polling.
+		Queue<Integer> pq = new PriorityQueue<>(n + 1);
 		for(int i: data) {
 			if (pq.size() < n) {
 				pq.offer(i);
 			} else {
-				pq.poll();
+				// Replace the smallest with the new item.
 				pq.offer(i);
+				pq.poll();
 			}
 		}
 		int[] result = new int[n];
@@ -39,11 +45,14 @@ public class QueueImp {
 	 * @return
 	 */
 	public static List<Integer> topNElem(List<Integer> data, int n) {
-		PriorityQueue<Integer> pq = new PriorityQueue<Integer> (n + 1);
+		// By default it builds min heap based priority queue.
+		// n + 1, to prevent loss of any of the top N elements in polling.
+		Queue<Integer> pq = new PriorityQueue<Integer> (n + 1);
 		for(Integer i : data) {
 			if (pq.size() < n) {
 				pq.offer(i);
 			} else {
+				// Replace the smallest with the new item.
 				pq.offer(i);
 				pq.poll();
 			}
@@ -63,13 +72,14 @@ public class QueueImp {
 	 * @return
 	 */
 	public static List<Integer> bottomNElem(List<Integer> data, int n) {
-		PriorityQueue<Integer> pq = new PriorityQueue<Integer> (n + 1, (i1, i2) -> {
-				return i2 - i1;
-		});
+		// Max heap, b - a.
+		// n + 1, to prevent loss of any of the top N elements in polling.
+		Queue<Integer> pq = new PriorityQueue<Integer> (n + 1, (a, b) -> b - a);
 		for(Integer i : data) {
 			if (pq.size() < n) {
 				pq.offer(i);
 			} else {
+				// Replace the largest with new item.
 				pq.offer(i);
 				pq.poll();
 			}
@@ -129,6 +139,46 @@ public class QueueImp {
 		return output;
 	}
 	
+	/**
+	 * Problem:
+		Inside a list the words are sorted 
+		list1 -->aaa,bbb,ddd,xyxz,... 
+		list2-->bbb,ccc,ccc,hkp,.. 
+		list3> ddd,eee,,ffff,lmn,.. 
+		Solution:
+		1. while PriorityQueue<Entry<String, Integer>> is not empty
+		2. polling the smallest and replacing it with the same list's next elem.
+	 * @param listStrings
+	 */
+	public static void printSmallestString(List<List<String>> listStrings) {
+		Queue<Entry<String, Integer>> pq = new PriorityQueue<>(listStrings.size(),
+				(a, b) -> a.getKey().compareTo(b.getKey()));
+		for (int i=0; i<listStrings.size(); i++) {
+			List<String> list = listStrings.get(i);
+			if (list != null && list.size() > 0) {
+				pq.offer(new AbstractMap.SimpleEntry<String, Integer>(list.get(0), i));
+			} else {
+				// This ensure all lists have at least one element.
+				throw new IllegalArgumentException("Cannot accept null list or empty lists.");
+			}
+		}
+		
+		int[] listIndex = new int[listStrings.size()];
+		System.out.println();
+		while(!pq.isEmpty()) {
+			Entry<String, Integer> entry = pq.poll();
+			System.out.print(entry.getKey() + " ");
+			int minList = entry.getValue();
+			int minListNextIndex = ++listIndex[minList];
+			// Insert next element in min list.
+			if (minListNextIndex < listStrings.get(minList).size()) {
+				pq.offer(new AbstractMap.SimpleEntry<String, Integer>(listStrings.get(minList)
+						.get(minListNextIndex), minList));
+			}
+		}
+	}
+	
+	
 	public static void main(String[] args) {
 		// Test topN()
 		System.out.println("Testing topN testing");
@@ -158,6 +208,15 @@ public class QueueImp {
 		for(Point point: outputPoints) {
 			System.out.print(point + " ");
 		}
+		
+
+		List<List<String>> lists = new ArrayList<>();
+		lists.add(Arrays.asList("aaa", "bbb", "ddd", "xyxz"));
+		lists.add(Arrays.asList("bbb","ccc","ccc","hkp"));
+		lists.add(Arrays.asList("ddd","eee","ffff","lmn"));
+		
+		printSmallestString(lists);
+		
 		assert Objects.equals(outputPoints, Arrays.asList(new Point[]{new Point(4,4,4), new Point(3,3,3),
 				new Point(2,2,2), new Point(1,1,1), new Point(0,0,0)}));
 	}

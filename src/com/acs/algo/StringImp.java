@@ -385,6 +385,138 @@ public class StringImp {
 		return path;
 	}
 	
+	/**
+	 * "man cow duck"
+	 * ->
+	 * "duck cow man"
+	 * @param data
+	 */
+	public static void printReverse(char[] data) {
+		int endPoint = data.length - 1;
+		for(int i=data.length - 1; i >= 0; i--) {
+			if (data[i] == ' ') {
+				System.out.print(new String(Arrays.copyOfRange(data, i + 1, endPoint + 1)) + " ");
+				endPoint = i - 1;
+			}
+		}
+		System.out.println( Arrays.copyOfRange(data, 0, endPoint + 1));
+	}
+	
+	
+	/**
+	 *   "abcdefcdxaaaaa"
+	 *   search "cdx"
+	 *   
+	 * @param data
+	 * @param search
+	 * @return
+	 */
+	public static int subStr(char[] data, char[] search) {
+		for(int i = 0; i < data.length; i++) {
+			int j = 0;
+			for (j = 0; j < search.length; j++) {
+				if (data[i + j] != search[j]) {
+					i += j;
+					j = 0;
+					break;
+				}
+			}
+			if (j == search.length) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	
+	/**
+	 * goodnightsleep is breakable.
+	 * @param string
+	 * @param start
+	 * @param end
+	 * @param cache
+	 * @param dic
+	 * @return
+	 */
+	public static boolean isBreakable(char[] string, int start, int end, boolean[] cache, Set<String> dic) {
+		if (string == null || cache == null || start >= end) {
+			throw new IllegalArgumentException();
+		}
+		if (dic.contains(String.valueOf(string, start, end - start + 1))) {
+			return true;
+		}
+		if (cache[start]) {
+			return false;
+		} else {
+			cache[start] = true;
+		}
+		for (int pivot = start + 1; pivot < end; pivot++) {
+			if (dic.contains(String.valueOf(string, start, pivot - start + 1))) {
+				if (isBreakable(string, pivot + 1, end, cache, dic)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * goodnightsleep is breakable.
+	 * @param string
+	 * @param start
+	 * @param end
+	 * @param cache
+	 * @param dic
+	 * @return
+	 */
+	public static boolean isBreakable(String string, int start, boolean[] cache, Set<String> dic) {
+		if (string == null || cache == null) {
+			throw new IllegalArgumentException();
+		}
+		if (dic.contains(string)) {
+			return true;
+		}
+		if (cache[start]) {
+			return false;
+		} else {
+			cache[start] = true;
+		}
+		for (int pivot = 1; pivot < string.length(); pivot++) {
+			if (dic.contains(string.substring(0, pivot + 1))) {
+				if (isBreakable(string.substring(pivot + 1), start + pivot + 1, cache, dic)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static String skipOutChar(String str, int loc) {
+		if (str.length() <= 1) {
+			return "";
+		}
+		String skipped = str.substring(0, loc);
+		if (loc < str.length() - 1) {
+			skipped += str.substring(loc + 1);
+		}
+		return skipped;
+	}
+	
+	/**
+	 * Permutate variation.
+	 * @param current
+	 * @param left
+	 */
+	public static void permutate(String current, String left) {
+		if ("".equals(left)) {
+			System.out.println(current);
+			return;
+		}
+		for (int i = 0; i< left.length(); i++) {
+			permutate(current + left.charAt(i), skipOutChar(left, i));
+		}
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -435,6 +567,17 @@ public class StringImp {
 		String[] dictionary = {"TOON", "POON", "PLEE", "SAME", "POIE", "PLEA", "PLIE", "POIN"};
 		pathBetweenWords("TOON", "PLEA", dictionary);
 		
+		printReverse("man cow duck".toCharArray());
+		assert subStr("abcdefcdxaaaaa".toCharArray(), "cdx".toCharArray()) == 6 : " should be 6";
+		assert subStr("abcdefcdxaaaaa".toCharArray(), "cdz".toCharArray()) == -1 : "should not be found";
+		
+		String test = "goodnightsleep";
+		int size = test.length();
+		assert isBreakable(test.toCharArray(), 0, size - 1, new boolean[size], new HashSet<>(Arrays.asList("good", "night", "sleep")));
+		assert isBreakable(test, 0, new boolean[size], new HashSet<>(Arrays.asList("good", "night", "sleep")));
+		
+		permutate("", "abc");
+
 		System.out.println("Done: Testing String related puzzles");
 	}
 }

@@ -131,11 +131,28 @@ public class MapImp {
 		return result;
 	}
 	
-	/*
-	public static List<List<String>> dedupeContacts(Map<String, Set<String>> contactEmailMap) {
-		Map<String, >
+	/**
+	 * Compute execution and cooling cost for set of tasks.
+	 * Same task would take cooling time.
+	 * @param jobs
+	 * @param cooling
+	 * @return total time including cooling.
+	 */
+	public static int jobTimeWithCooling(String[] jobs, int cooling) {
+		Map<String, Integer> map = new HashMap<>();
+		int current = 0;
+		for (String job: jobs) {
+			if (map.get(job) == null) {
+				map.put(job, current);
+			} else {
+				int found = map.get(job);
+				current = Math.max(current, found + 1 + cooling);
+				map.put(job, current);
+			}
+			current++;
+		}
+		return current;
 	}
-	*/
 	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
@@ -165,6 +182,8 @@ public class MapImp {
 		
 		System.out.println(fibinocci(10, new HashMap<>()));
 		assert Objects.equals(fibinocci(10, new HashMap<>()), 55);
+		assert jobTimeWithCooling(new String[] {"A", "A"}, 3) == 5;
+		assert jobTimeWithCooling(new String[] {"A", "B", "A", "B" }, 3) == 6;
 		
 		System.out.println("Done: Testing puzzles with Hashmaps");
 
