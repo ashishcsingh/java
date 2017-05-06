@@ -3,11 +3,16 @@ package com.acs.algo;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class QueueImp {
 	
@@ -122,7 +127,7 @@ public class QueueImp {
 			return other.x == this.x && other.y == this.y && other.z == this.z;
 		}
 	}
-	public static List<Point> closestNPoints(List<Point> data, int n) {
+	public static List<Point> largestNPoints(List<Point> data, int n) {
 		PriorityQueue<Point> pq = new PriorityQueue<Point>(n + 1);
 		for(Point point: data) {
 			if(pq.size() < n) {
@@ -138,6 +143,26 @@ public class QueueImp {
 		}
 		return output;
 	}
+	
+	/**
+	 * Find K Largest elements.
+	 * 
+	 */
+	public static List<Integer> topKElements(List<Integer> data, int k) {
+		NavigableSet<Integer> set = new TreeSet<>( (a,b) -> a - b);
+		for (int i = 0; i < k; i++) {
+			set.add(data.get(i));
+		}
+		for (int i = 0; i < k; i++) {
+			set.add(data.get(i));
+		}
+		for (int i = k; i < data.size(); i++) {
+			set.pollFirst();
+			set.add(data.get(i));
+		}
+		return new ArrayList<>(set);
+	}
+	
 	
 	/**
 	 * Problem:
@@ -178,11 +203,101 @@ public class QueueImp {
 		}
 	}
 	
+	/**
+	 * Round queue that serves data.
+	 * @author ashish
+	 *
+	 */
+	public static class RoundQueue {
+		final private byte[] data;
+		final private int size;
+		private int start, length;
+		public RoundQueue(int size) {
+			this.size = size;
+			data = new byte[size];
+			this.length = this.start = 0;
+		}
+		/**
+		 * Enqueue data from input of desiredLen via FIFO (queue)
+		 * @param input
+		 * @param desiredLen
+		 * @return Max possible data that can be inserted.
+		 */
+		public int enqueue(byte[] input, int desiredLen) {
+			if ((start + length) % size >= start) {
+				//  [  start  --> length]
+				int first = Math.min(desiredLen, size - (start + length));
+				int second = 0;
+				System.arraycopy(input, 0, data, start + length, first);
+				if (desiredLen - first > 0) {
+					second = Math.min(desiredLen - first, start);
+					System.arraycopy(input, first, data, 0, second);
+				}
+				length = length + first + second;
+				return first + second;
+			} else {
+				// [  -> length    start -> ]
+				int first = Math.min(desiredLen, start - (start + length) % size);
+				System.arraycopy(input, 0, data, (start + length) % size, first);
+				length = length + first;
+				return first;
+			}
+		}
+		
+		/**
+		 * Dequeue data to output of desiredLen via FIFO (queue)
+		 * @param output
+		 * @param desiredLen
+		 * @return Max possible data that can be removed.
+		 */
+		public int dequeue(byte[] output, int desiredLen) {
+			if ((start + length) % size < start) {
+				// [  -> length    start -> ]
+				int first = Math.min(desiredLen, size - start);
+				int second = 0;
+				System.arraycopy(data, start, output, 0, first);
+				if (desiredLen - first > 0) {
+					second = Math.min(desiredLen - first, (start + length) % size);
+					System.arraycopy(data, 0, output, first, second);
+				}
+				start = (start + first + second) % size;
+				return first + second;
+			} else {
+				// [ start -> length ]
+				int first = Math.min(desiredLen, length);
+				System.arraycopy(data, start, output, 0, first);
+				start = start + first;
+				return first;
+			}
+		}
+	}
+	
+	/**
+	 * Using priorityQueue merge K sorted array.
+	 * @param lists
+	 * @return
+	 */
+	public static List<Integer> mergeKSortedArrays(Collection<Collection<Integer>> lists) {
+		Queue<Integer> queue = new PriorityQueue<>();
+		for (Collection<Integer> list : lists) {
+			for (Integer item: list) {
+				queue.add(item);
+			}
+		}
+		List<Integer> output = new ArrayList<Integer>();
+		for (Integer item: queue) {
+			output.add(item);
+		}
+		return output;
+	}
+	
+	
 	
 	public static void main(String[] args) {
 		// Test topN()
-		System.out.println("Testing topN testing");
+		System.out.println("--- Testing topN testing");
 		assert Arrays.equals(topN(new int[] {1,2,3,5,6,7,8}, 5), new int[] {3,5,6,7,8});
+		assert topKElements(Arrays.asList(1,2,3,5,6,7,8), 5).equals(Arrays.asList(3,5,6,7,8));
 		System.out.println("Testing topNElem");
 		List<Integer> data = new ArrayList<>();
 		for(int i = 0; i< 100; i++) {
@@ -204,7 +319,7 @@ public class QueueImp {
 		for(int i = 0; i< 100; i++) {
 			points.add(new Point(i, i, i));
 		}
-		List<Point> outputPoints = closestNPoints(points, 5);
+		List<Point> outputPoints = largestNPoints(points, 5);
 		for(Point point: outputPoints) {
 			System.out.print(point + " ");
 		}
@@ -219,6 +334,25 @@ public class QueueImp {
 		
 		assert Objects.equals(outputPoints, Arrays.asList(new Point[]{new Point(4,4,4), new Point(3,3,3),
 				new Point(2,2,2), new Point(1,1,1), new Point(0,0,0)}));
+		
+		RoundQueue rq = new RoundQueue(5);
+		rq.enqueue("abcdefghijk".getBytes(), 8);
+		byte[] fromQ =  new byte[8];
+		rq.dequeue(fromQ, 8);
+		System.out.println("String : " + new String(fromQ));
+		assert "abcde".equals(new String("abcde"));
+		
+		Collection<Collection<Integer>> lists2 = new ArrayList<Collection<Integer>>();
+		lists2.add(Arrays.asList(1, 2, 5, 10));
+		lists2.add(Arrays.asList(3, 6, 9, 11));
+		lists2.add(Arrays.asList(4, 7, 8, 12));
+		
+		Collection<Integer> output2 = mergeKSortedArrays(lists2);
+		System.out.println("merged k sorted should be 1 to 12: ");
+		System.out.println(output2);
+		
+		System.out.println("---  Done test");
+		
 	}
 
 }

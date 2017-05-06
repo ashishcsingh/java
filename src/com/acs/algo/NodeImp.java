@@ -1,13 +1,19 @@
 package com.acs.algo;
 
+import java.util.AbstractMap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -29,6 +35,54 @@ public class NodeImp {
 			left = l;
 			right = r;
 			data = d;
+		}
+	}
+	
+	/**
+	 * Node with Inorder iterators.
+	 * @author asingh
+	 *
+	 */
+	public static class NodeIterable implements Iterable<Integer> {
+		public NodeIterable left, right;
+		public int data;
+		NodeIterable(int data) {
+			this.data = data;
+		}
+		NodeIterable(NodeIterable left, NodeIterable right, int data) {
+			this.data = data;
+			this.left = left;
+			this.right = right;
+		}
+		@Override
+		public Iterator<Integer> iterator() {
+			return new NodeIterator(this);
+		}
+		private class NodeIterator implements Iterator<Integer> {
+			Stack<NodeIterable> stack = new Stack<>();
+			NodeIterator(NodeIterable node) {
+				traverseLefts(node);
+			}
+			private void traverseLefts(NodeIterable node) {
+				if (node == null) {
+					return;
+				}
+				stack.push(node);
+				traverseLefts(node.left);
+			}
+			@Override
+			public boolean hasNext() {
+				return !stack.isEmpty();
+			}
+			@Override
+			public Integer next() {
+				if (hasNext()) {
+					NodeIterable node = stack.pop();
+					traverseLefts(node.right);
+					return node.data;
+				}
+				throw new NoSuchElementException();
+			}
 		}
 	}
 	
@@ -102,6 +156,7 @@ public class NodeImp {
 		return isSumOnPath(node.left, sumLeft - node.data) || isSumOnPath(node.right, sumLeft - node.data);
 	}
 	
+	
 	/**
 	 * Checks if tree is balanced.
 	 * By checking if either left/right nodes are off by more than 1 or they are imbalanced.
@@ -158,7 +213,7 @@ public class NodeImp {
 		if (root == null) {
 			return null;
 		}
-		Stack<Node> s = new Stack<>();
+		Deque<Node> s = new ArrayDeque<>();
 		s.add(root);
 		while(!s.isEmpty()) {
 			Node node = s.pop();
@@ -595,6 +650,23 @@ public class NodeImp {
 	}
 	
 	/**
+	 * DFS and swap content of tree.
+	 * @param node
+	 */
+	public static void mirrorTree(Node node) {
+		if (node != null) {
+			mirrorTree(node.left);
+			// Swap content of left and right nodes.
+			{
+				Node temp = node.left;
+				node.left = node.right;
+				node.right = temp;
+			}
+			mirrorTree(node.right);
+		}
+	}
+	
+	/**
 	 * Get all contacts that are connected.
 	 * @param contact
 	 * @param contactToEmails
@@ -622,6 +694,227 @@ public class NodeImp {
 		}
 		return visited;
 	}
+	
+	/**
+	 * Find path in a maze using DFS.
+	 * @param maze
+	 * @param x
+	 * @param y
+	 * @param desX
+	 * @param desY
+	 * @param path
+	 * @return
+	 */
+	public static boolean findPath(char[][] maze, int x, int y, int desX, int desY, Stack<Entry<Integer, Integer>> path) {
+		// Detect bad input, can add more conditions about x, y.
+		if (maze == null || maze[y][x] == '1') {
+			throw new IllegalArgumentException();
+		}
+		// If reached destination then print the stack path.
+		if (x == desX && y == desY) {
+			maze[desY][desX] = '+';
+			for (Entry<Integer, Integer> point : path) {
+				System.out.print(point.getKey() + ", " + point.getValue() + " ==> ");
+			}
+			System.out.println(y + ", " + x);
+			return true;
+		}
+		// If the current value as a possible valid point.
+		path.push(new AbstractMap.SimpleEntry<Integer, Integer>(y, x));
+		// Must mark current point as visited.
+		maze[y][x] = '1';
+		// Explore all neighbors that are valid.
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (x + i >= 0 && x + i <= desX && y + j >= 0 && y + j <= desY) {
+					if (maze[y + j][x + i] == '0') {
+						return findPath(maze, x + i, y + j, desX, desY, path);
+					}
+				}
+			}
+		}
+		// At this point the current point was not reaching a valid point so remove it.
+		maze[y][x] = '0';
+		path.pop();
+		return false;
+	}
+	
+	static class ListNode {
+		public int data;
+		public ListNode next;
+		ListNode(int data, ListNode next) {
+			this.data = data;
+			this.next = next;
+		}
+		ListNode() {}
+	}
+	
+	/**
+	 * Given K sorted linkedList, return one sorted list.
+	 * @param lists
+	 * @return
+	 */
+	public static ListNode mergeKSortedLists(List<ListNode> lists) {
+		PriorityQueue<ListNode> pq = new PriorityQueue<>(lists.size(), (a, b) -> a.data - b.data);
+		for (ListNode node : lists) {
+			pq.offer(node);
+		}
+		ListNode head = null, cur = null, node = null;
+		while(!pq.isEmpty()) {
+			node = pq.poll();
+			if (head == null) {
+				head = cur = node;
+			} else {
+				cur.next = node;
+				cur = cur.next;
+			}
+			if (node.next != null) {
+				pq.offer(node.next);
+			}
+		}
+		return head;
+	}
+	
+	/**
+	 * Finds minimum range to cover elements in all the lists.
+	 * @param lists
+	 * @return
+	 */
+	public static int minRange(List<ListNode> lists) {
+		PriorityQueue<ListNode> pq = new PriorityQueue<>(lists.size(), (a, b) -> (a.data - b.data));
+		int max = Integer.MIN_VALUE, result = Integer.MAX_VALUE;
+		for(ListNode node : lists) {
+			pq.offer(node);
+			max = Math.max(max, node.data);
+		}
+		result = Math.min(result, max - pq.peek().data + 1);
+		while(!pq.isEmpty()) {
+			ListNode node = pq.poll();
+			if (node.next != null) {
+				pq.offer(node.next);
+				max = Math.max(max, node.next.data);
+				result = Math.min(result, max - pq.peek().data + 1);
+			} else {
+				break;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Compute max diameter of a tree.
+	 * @param node
+	 * @return
+	 */
+	public static int depth(Node node) {
+		if (node == null || (node.left == null && node.right == null)) {
+			return 0;
+		}
+		// From depth of left and right.
+		int depth = Math.max(depth(node.left), depth(node.right));
+		// From height of left and right.
+		int heightLeft = node.left == null ? 0 : height(node.left) + 1;
+		int heightRight = node.right == null ? 0 : height(node.right) + 1;
+		// Max of depth and combined left/right heights.
+		return Math.max(depth, heightLeft + heightRight);
+	}
+	
+	public static int height(Node node) {
+		if (node == null || (node.left == null && node.right == null)) {
+			return 0;
+		}
+		return Math.max(height(node.left), height(node.right)) + 1;
+	}
+	
+	/**
+	 * Find second smallest in a Tree.
+	 * https://www.careercup.com/question?id=5196022759292928
+	 */
+	public static int secondSmallest(Node node) {
+		if (node == null) {
+			throw new IllegalArgumentException("Node empty");
+		}
+		int smallest = node.data;
+		int second = Integer.MAX_VALUE;
+		Deque<Node> deq = new LinkedList<>();
+		deq.push(node);
+		while (!deq.isEmpty()) {
+			Node cur = deq.pop();
+			if (cur.data != smallest) {
+				second = Math.min(second, cur.data);
+			}
+			if (cur.left != null) {
+				deq.push(cur.left);
+			}
+			if (cur.right != null) {
+				deq.push(cur.right);
+			}
+		}
+		return second;
+	}
+
+   public static class NodeWithParent {
+        public NodeWithParent left, right, parent;
+        public int data;
+        NodeWithParent(int data) {
+            this.data = data;
+        }
+    };
+    
+    static NodeWithParent dfs(NodeWithParent root, int data) {
+        if (root != null) {
+            if (root.data == data) {
+                return root;
+            }
+            NodeWithParent left = dfs(root.left, data);
+            if (left != null) {
+                return left;
+            }
+            NodeWithParent right = dfs(root.right, data);
+            if (right != null) {
+                return right;
+            }
+        }
+        return null;
+    }
+    
+    static int height(NodeWithParent node) {
+        if (node == null) {
+            return 0;
+        }
+        int result = 1;
+        if (node.parent != null) {
+           result = height(node.parent) + 1;
+        }
+        return result;
+    }
+    
+    static public NodeWithParent lcaWithParent(NodeWithParent root, int d1, int d2) {
+        NodeWithParent nodeLeft = dfs(root, d1);
+        NodeWithParent nodeRight = dfs(root, d2);
+        if (nodeLeft == null) {
+            return null;
+        }
+        if (nodeRight == null) {
+            return null;
+        }
+        int heightLeft = height(nodeLeft);        
+        int heightRight = height(nodeRight);
+        if (heightLeft > heightRight) {
+            for (int i = 0;  i < heightLeft - heightRight; i++) {
+                nodeLeft = nodeLeft.parent;
+            }
+        } else {
+             for (int i = 0;  i < heightRight - heightLeft; i++) {
+                nodeRight = nodeRight.parent;
+             }
+        }
+        while (nodeLeft.data != nodeRight.data) {
+            nodeLeft = nodeLeft.parent;
+            nodeRight = nodeRight.parent;
+        }
+        return nodeLeft;
+    }
 
 	/**
 	 * Tester methods.
@@ -651,6 +944,7 @@ public class NodeImp {
 		}
 		levelOrdering2(randomTree);
 		System.out.println("Level ordering for random tree");
+		
 		Node serialedNode = null;
 		for(int i=5; i<10; i++) {
 			serialedNode = insertToBst(serialedNode, i + 1);
@@ -696,8 +990,6 @@ public class NodeImp {
 		
 		// Check reversing module.
 		reverseList(palindrome);
-		assert palindrome.data == 3;
-		assert palindrome.next.data == 1;
 		
 		// Check dedupContacts
 		// c1..4 should one connected contact and c5 should be another set.
@@ -709,6 +1001,93 @@ public class NodeImp {
 		contactToEmails.put("c5", Arrays.asList("email8", "email9"));
 		dedupContacts(contactToEmails);
 		
+		char[][] maze = new char[][] {
+			{ '0', '1', '0', '0', '0'},
+			{ '0', '1', '0', '1', '0'},
+			{ '0', '1', '0', '1', '0'},
+			{ '0', '0', '0', '1', '0'},
+		};
+		System.out.println("Using DFS : ");
+		findPath(maze, 0, 0, 4, 3, new Stack<Entry<Integer, Integer>>());
+		
+		// Test simple mirror.
+		Node m3 = new Node(new Node(1), new Node(5), 3);
+		mirrorTree(m3);
+		assert m3.left.data == 5 : "after swapping it should be 5";
+		assert m3.right.data == 1 : "after swapping it should be 1";
+		
+		ListNode nl1 = new ListNode(1, new ListNode(5, new ListNode(7, new ListNode(9, null))));
+		ListNode nl2 = new ListNode(2, new ListNode(4, new ListNode(8, new ListNode(10, null))));
+		ListNode nl3 = new ListNode(3, new ListNode(6, new ListNode(11, new ListNode(12, null))));
+		List<ListNode> lists = Arrays.asList(nl1, nl2, nl3);
+		ListNode sortedListNode = mergeKSortedLists(lists);
+		for(int i = 1; i<=12; i++) {
+			assert sortedListNode.data == i;
+			System.out.print(sortedListNode.data + ", ");
+			sortedListNode = sortedListNode.next;
+		}
+		
+		ListNode nl4 = new ListNode(10, new ListNode(50, new ListNode(90, null)));
+		ListNode nl5 = new ListNode(1, new ListNode(26, null));
+		ListNode nl6 = new ListNode(100, null);
+		List<ListNode> lists2 = Arrays.asList(nl4, nl5, nl6);
+		
+		System.out.println();
+		assert minRange(lists2) == 75;
+		
+		/*
+		 *         3
+		 *        2 4
+		 *       1   5
+		 */
+		NodeIterable n12345 = new NodeIterable(new NodeIterable(null, null, 2), new NodeIterable(null, null, 4), 3);
+		n12345.left.left = new NodeIterable(1);
+		n12345.right.right = new NodeIterable(5);
+		assert n12345.data == 3;
+		assert n12345.left.data == 2;
+		assert n12345.left.left.data == 1;
+		assert n12345.right.data == 4;
+		assert n12345.right.right.data == 5;
+		System.out.println("should be 1,2,3,4,5 while iterating inoder");
+		for(Integer val: n12345) {
+			System.out.print(val + ", ");
+		}
+		System.out.println();
+		System.out.println("Another attempt");
+		Iterator<Integer> itr = n12345.iterator();
+		while(itr.hasNext()) {
+			System.out.print(itr.next() + ", ");
+		}
+	
+		/**
+		 * 						6
+		 * 					5		4			
+		 * 			3
+		 * 		1		2
+		 * 
+		 */
+		Node nDeep = new Node(new Node(new Node(new Node(1), new Node(2), 3), null, 5), new Node(4), 6);
+		assert height(nDeep) == 3; 
+		assert depth(nDeep) == 4;
+		
+		/**
+		 *      2
+		 *   2     5
+		 *  2  3  5  10
+		 */
+		Node n225 = new Node(new Node(2), new Node(5), 2);
+		n225.left = new Node(new Node(2), new Node(3), 2);
+		n225.right = new Node(new Node(5), new Node(10), 5);
+		assert secondSmallest(n225) == 3;
+	
+       NodeWithParent n1Parent = new NodeWithParent(1);
+       n1Parent.left = new NodeWithParent(2);
+       n1Parent.left.parent = n1Parent;
+       n1Parent.right = new NodeWithParent(3);
+       n1Parent.right.parent = n1Parent;
+       assert lcaWithParent(n1Parent, 2, 3) == n1Parent;
+		
+		System.out.println();
 		// Means no assert failure.
 		System.out.println("Done: Testing Graph related puzzles");
 	}

@@ -1,10 +1,13 @@
 package com.acs.algo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class MapImp {	
 	public static Map<Integer, Integer> histogram(int... data) {
@@ -154,6 +157,47 @@ public class MapImp {
 		return current;
 	}
 	
+	
+	/**
+	 * Print unique nums when not sorted.
+	 * @param data
+	 */
+	public static void printUniqueNums(int[] data) {
+		System.out.println("Unqiue nums : ");
+		Map<Integer, Integer> countMap = new HashMap<>();
+		for (Integer val : data) {
+			if (countMap.containsKey(val)) {
+				countMap.put(val, countMap.get(val) + 1);
+			} else {
+				countMap.put(val, 1);
+			}
+		}
+		for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
+			if (entry.getValue() == 1) {
+				System.out.print(entry.getKey() + ", ");
+			}
+		}
+		System.out.println();
+	}
+	
+	public static void printUniqueNumsForSorted(int[] data) {
+		System.out.println("Sorted Unqiue nums : ");
+		if (data.length == 1) {
+			System.out.print(data[0]);
+			return;
+		}
+		for (int i = 1; i < data.length - 1; i++) {
+			if (data[i - 1] != data[i] && data[i] != data[i+1]) {
+				System.out.print(data[i] + ", ");
+			}
+		}
+		if (data[data.length - 2] != data[data.length - 1]) {
+			System.out.print(data[data.length - 1] + ", ");
+		}
+	}
+	
+
+	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		System.out.println("Start: Testing puzzles with Hashmaps");
@@ -184,6 +228,12 @@ public class MapImp {
 		assert Objects.equals(fibinocci(10, new HashMap<>()), 55);
 		assert jobTimeWithCooling(new String[] {"A", "A"}, 3) == 5;
 		assert jobTimeWithCooling(new String[] {"A", "B", "A", "B" }, 3) == 6;
+		
+		int uniqueData[] = {1, 1, 2, 3, 4, 4, 5, 5};
+		printUniqueNums(uniqueData);
+		System.out.println("Now for sorted");
+		printUniqueNumsForSorted(uniqueData);
+		
 		
 		System.out.println("Done: Testing puzzles with Hashmaps");
 

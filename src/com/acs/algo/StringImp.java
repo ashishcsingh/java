@@ -2,12 +2,16 @@ package com.acs.algo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import com.google.common.collect.ImmutableList;
 
@@ -110,6 +114,57 @@ public class StringImp {
 			str[loc] = ')';
 			printParathesis(str, loc + 1, left, right - 1);
 		}
+	}
+	
+	/**
+	 * 2D word Scrable with Cross options.
+	 * Check if a word exists.
+	 * Check if the start alphabet matches.
+	 * @param board
+	 * @param word
+	 * @return
+	 */
+	public static boolean wordExistsInScrable(char[][]board, String word) {
+		if (board == null || word == null) {
+			throw new IllegalArgumentException("not valid");
+		}
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board.length; j++) {
+				if (board[i][j] == word.charAt(0) && wordExistsInScrable(board, i, j, 0, word)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Alphabet at loc is already matched, the proceedings are matched.
+	 * @param board
+	 * @param y
+	 * @param x
+	 * @param loc
+	 * @param word
+	 * @return
+	 */
+	private static boolean wordExistsInScrable(char[][] board, int y, int x, int loc, String word) {
+		if (word.length() - 1 == loc) {
+			return true;
+		}
+		board[y][x] = '*';
+		for (int i = y - 1; i <= y + 1; i++) {
+			for (int j = x - 1; j <= x + 1; j++) {
+				if ( i >= 0 && i < board.length && j >= 0 && j < board.length && loc - 1 < word.length() &&
+						board[i][j] == word.charAt(loc + 1)) {
+					 if (wordExistsInScrable(board, i, j, loc + 1, word)) {
+						 board[y][x] = word.charAt(loc);
+						 return true;
+					 }
+				}
+			}
+		}
+		board[y][x] = word.charAt(loc);
+		return false;
 	}
 	
 	
@@ -517,6 +572,63 @@ public class StringImp {
 		}
 	}
 	
+	private static String sortWord(String word) {
+		char[] chars = word.toCharArray();
+		Arrays.sort(chars);
+		return String.valueOf(chars);
+	}
+	
+	public static int coolingTime(List<String> jobs, int cooling) {
+		int time = 0;
+		Map<String, Integer> map = new HashMap<>();
+		for (String job: jobs) {
+			Integer foundTime = map.get(job);
+			if (foundTime != null && (time - foundTime <= cooling)) {
+				time = time - foundTime + cooling - 1;
+			}
+			map.put(job, time);
+			time++;
+		}
+		return time;
+	}
+	
+	public static void printSameAnagrams(List<String> words) {
+		Map<String, List<String>> map = new HashMap<>();
+		for (String word : words) {
+			String sorted = sortWord(word);
+			map.putIfAbsent(sorted, new ArrayList<>());
+			map.get(sorted).add(word);
+		}
+		
+		for (String key : map.keySet()) {
+			System.out.println(map.get(key));
+		}
+	}
+	
+	/**
+	 * Using List.
+	 * @param current
+	 * @param left
+	 */
+	public static void printPermutate2(char[] string, int current) {
+		if (current == string.length) {
+			System.out.print(String.valueOf(string) + " , ");
+			return;
+		}
+		for(int i = current; i < string.length; i++) {
+			swap(string, current, i);
+			printPermutate2(string, current + 1);
+			swap(string, current, i);
+		}
+	}
+	
+	private static void swap(char[] string, int to, int from) {
+		// swap characters.
+		char temp = string[to];
+		string[to] = string[from];
+		string[from] = temp;
+	}
+	
 	/**
 	 * str can take 0..9 and +,-
 	 * ex. 43 + 12 - 3
@@ -555,6 +667,69 @@ public class StringImp {
 		current = neg? -current : current;
 		result += current;
 		return result;
+	}
+	
+	/**
+	 * 1+2...9 == 100 then print
+	 * Find all such equations made of +,-
+	 * @param str
+	 * @param i
+	 */
+	public static void printEvalsTo100(String str, int i) {
+		if (i == 10) {
+			if (eval(str) == 100) {
+				System.out.println(str);
+			}
+			return;
+		}
+		printEvalsTo100(str + String.valueOf(i), i + 1);
+		if (i > 1) {
+			printEvalsTo100(str + "+" + String.valueOf(i), i + 1);
+		}
+		printEvalsTo100(str + "-" + String.valueOf(i), i + 1);
+	}
+	
+	/**
+	 * print phone pad.
+	 * @param out
+	 * @param in
+	 * @param len
+	 */
+	public static void printPhonePad(char[] chars, char[] nums, int len) {
+		if (len == nums.length) {
+			System.out.print(String.valueOf(chars) + " , ");
+			return;
+		}
+		char[] alphabets = alphas(nums[len]);
+		for (char c: alphabets) {
+			chars[len] = c;
+			printPhonePad(chars, nums, len + 1);
+		}
+	}
+	
+	private static char[] alphas(char c) {
+		if (c == '0') {
+			return new char[]{' '};
+		}
+		if (c < '1' || c > '9') {
+			throw new IllegalArgumentException("Must be valid number");
+		}
+		char[] chars = new char[3];
+		for(int i = 0; i< 3; i++) {
+			chars[i] = (char) ((c - '1') * 3 + 'A' + i);
+		}
+		return chars;
+	}
+	
+	public static boolean isRotation(String str1, String str2) {
+		if (str1.length() != str2.length()) {
+			return false;
+		}
+		String doubleStr1 = str1 + str1;
+		if(doubleStr1.indexOf(str2) != -1) {
+			return true;
+		}
+		return false;
 	}
 	
 	public static void main(String[] args) {
@@ -618,8 +793,39 @@ public class StringImp {
 		
 		System.out.println("permutate with call stack ");
 		permutate("", "abc");
+		
+		assert sortWord("cba").equals("abc");
+		
+		System.out.println("Printing same anagrams");
+		printSameAnagrams(Arrays.asList("boat", "toab", "abc", "cba", "a"));
 		assert eval("12 + 5 - 5") == 12;
 		assert eval("-12 - 5 + 5 + 12") == 0;
+		printEvalsTo100("", 1);
+		char[][] scrable = { 
+				{'p', 'l', 'a', 'c', 'e'},
+				{'s', 'm', 'i', 'l', 'e'},
+				{'w', 'i', 'r', 'e', 'd'},
+				{'w', 'i', 'r', 'e', 'd'},
+				{'w', 'i', 'r', 'e', 'd'}
+		};
+		assert wordExistsInScrable(scrable, "mice") == true : "should exists in from center going right above";
+		assert wordExistsInScrable(scrable, "xxx") == false: "should not exists in from center going right above";
+		
+		assert coolingTime(Arrays.asList("A", "B", "A", "B"), 3) == 6;
+		
+		System.out.println("Print phone pad for 12:");
+        char[] dataAlphas = alphas('1');
+        assert dataAlphas[0] == 'A';
+        assert dataAlphas[1] == 'B';
+        assert dataAlphas[2] == 'C';
+        assert dataAlphas.length == 3;
+        printPhonePad(new char[2], new char[]{'1', '2'}, 0);
+        System.out.println("Permutations2 : ");        
+        printPermutate2("ABC".toCharArray(), 0);
+        System.out.println();
+        assert isRotation("abc", "cab");
+        assert !isRotation("abc", "cba");
+
 		System.out.println("Done: Testing String related puzzles");
 	}
 }

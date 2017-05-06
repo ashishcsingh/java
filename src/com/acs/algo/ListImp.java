@@ -292,7 +292,63 @@ public class ListImp {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Max profit over daily stock prices.
+	 * @param values
+	 * @return
+	 */
+	public static float maxStockProfit(List<Float> values) {
+		if (values.size() < 2) {
+			throw new IllegalArgumentException();
+		}
+		float profit = 0.0F, min = values.get(0);
+		for (int i = 1; i<values.size(); i++) {
+			profit = Math.max(profit, values.get(i) - min);
+			min = Math.min(min, values.get(i));
+		}
+		return profit;
+	}
+	
+	/**
+	 * Toggle lockers
+	 *  1 2 3 4 5 6 7 8
+	 *  o o o o o o o o
+	 *  o c o c o c o c
+	 *  o c c c o o o c
+	 *  o c c o o o o o
+	 *  o c c o c o o o
+	 *  o c c o c c o o
+	 *  o c c o c c c o
+	 *  o c c o c c c c
+	 *  
+	 * https://www.careercup.com/question?id=6263110739427328
+	 * @param args
+	 */
+	public static void printToggledOutput(int size) {
+		boolean arr[] = new boolean[size];
+		int inc = 1;
+		while (inc <= size) {
+			for (int i = inc - 1; i < size; i+=inc) {
+				arr[i] = !arr[i];
+			}
+			inc++;
+		}
+		for (int i = 0; i < size; i++) {
+			if (arr[i]) {
+				System.out.print(i + 1 + " , ");
+			}
+		}
+	}
+	
+	public static void printToggledOutputOtimized(int size) {
+		int val = 1;
+		while (val * val <= size) {
+			System.out.print(val * val + " , ");
+			val++;
+		}
+	}
+	
 	public static void main(String[] args) {
 		// Test arrayUnique()
 		System.out.println("Start: Test list puzzles");
@@ -330,6 +386,15 @@ public class ListImp {
 	
 		assert (int) totalWatchedTime(Arrays.asList(new Segment(0.0f, 5.0f),
 				new Segment(3.0f, 8.0f), new Segment(9.0f, 12.0f))) == (int) 11.0f;
+		
+		assert maxStockProfit(Arrays.asList(1F, 2F, 1F, 5F)) == 4F;
+		
+		System.out.println(" Toggled : ");
+		printToggledOutput(10);
+		System.out.println();
+		System.out.println(" Toggled optimized");
+		printToggledOutputOtimized(10);
+		System.out.println();
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
