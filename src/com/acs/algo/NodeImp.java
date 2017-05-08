@@ -776,6 +776,58 @@ public class NodeImp {
 	}
 	
 	/**
+	 * Finds the path to destination Node.
+	 *      1
+	 *     2  3
+	 *   4      7
+	 *   
+	 *   
+	 *   path -> 1-2-4
+	 * @param root
+	 * @param data
+	 */
+	public static void pathToNode(Node root, int target, Deque<Integer> current, Deque<Integer> result) {
+		if (root == null || !result.isEmpty()) {
+			return;
+		}
+		current.addLast(root.data);
+		if (root.data == target) {
+			result.addAll(current);
+			return;
+		}
+		if (root.left != null) {
+			pathToNode(root.left, target, current, result);
+		}
+		if (root.right != null) {
+			pathToNode(root.right, target, current, result);
+		}
+		current.removeLast();
+	}
+	
+	public static int lcaNode(Node root, int d1, int d2) {
+		Deque<Integer> result1 = new LinkedList<Integer>();
+		pathToNode(root, d1, new LinkedList<Integer>(), result1);
+		Deque<Integer> result2 = new LinkedList<Integer>();
+		pathToNode(root, d2, new LinkedList<Integer>(), result2);
+		if (result1.isEmpty() || result2.isEmpty()) {
+			return -1;
+		}
+		Iterator<Integer> itr1 = result1.iterator();
+		Iterator<Integer> itr2 = result2.iterator();
+		int ancestor = -1;
+		while (itr1.hasNext() && itr2.hasNext()) {
+			int value1 = itr1.next();
+			int value2 = itr2.next();
+			if (value1 != value2) {
+				return ancestor;
+			}
+			ancestor = value1;
+		}
+		return ancestor;
+	}
+	
+	
+	/**
 	 * Finds minimum range to cover elements in all the lists.
 	 * @param lists
 	 * @return
@@ -878,13 +930,13 @@ public class NodeImp {
         return null;
     }
     
-    static int height(NodeWithParent node) {
+    static int heightFromRoot(NodeWithParent node) {
         if (node == null) {
             return 0;
         }
         int result = 1;
         if (node.parent != null) {
-           result = height(node.parent) + 1;
+           result = heightFromRoot(node.parent) + 1;
         }
         return result;
     }
@@ -898,8 +950,8 @@ public class NodeImp {
         if (nodeRight == null) {
             return null;
         }
-        int heightLeft = height(nodeLeft);        
-        int heightRight = height(nodeRight);
+        int heightLeft = heightFromRoot(nodeLeft);        
+        int heightRight = heightFromRoot(nodeRight);
         if (heightLeft > heightRight) {
             for (int i = 0;  i < heightLeft - heightRight; i++) {
                 nodeLeft = nodeLeft.parent;
@@ -1069,6 +1121,14 @@ public class NodeImp {
 		Node nDeep = new Node(new Node(new Node(new Node(1), new Node(2), 3), null, 5), new Node(4), 6);
 		assert height(nDeep) == 3; 
 		assert depth(nDeep) == 4;
+		assert nDeep.left.left.left.data == 1;
+		
+		Deque resultPath = new LinkedList<>();
+		pathToNode(nDeep, 2, new LinkedList<Integer>(), resultPath);
+		System.out.println("Path to 2 should be : 6532 : " + resultPath);
+		// Lowest common ancestor for a binary tree.
+		// Found by capturing path from both the nodes and then checking the first match.
+		assert lcaNode(nDeep, 1, 2) == 3;
 		
 		/**
 		 *      2

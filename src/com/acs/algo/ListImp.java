@@ -349,6 +349,56 @@ public class ListImp {
 		}
 	}
 	
+	/**
+	 * 6 : 2 * 3
+	 * 12: 2 * 6
+	 *     2 * 2 * 3
+	 *     3 * 4
+	 *     3 * 2 * 2
+	 *     4 * 3
+	 *     6 * 2
+	 *     
+	 *     https://www.careercup.com/question?id=5759894012559360
+	 *     
+	 *     1. List<Integer> = getMultFactors()
+	 *     2. for i : factors :
+	 *     		iLine = String.valueOf(i) + "*"
+	 *     		lines
+	 *     		for line: lineFactors:
+	 *     			lines.add(iLine += "line)
+	 *     	 return lines;  
+	 * @param num
+	 */	
+	private static List<String> getLineFactors(int num) {
+		List<String> lines = new ArrayList<String>();
+		List<Integer> factors = getNumFactors(num);
+		if (factors.isEmpty() || factors.size() == 1) {
+			return Collections.singletonList(String.valueOf(num));
+		}
+		for (int i : factors) {
+			String iWord = String.valueOf(i) + "*";
+			for (String line: getLineFactors(num / i)) {
+				lines.add(iWord + line);
+			}
+		}
+		return lines;
+	}
+	
+	/**
+	 * Returns all mult factors.
+	 * @param num
+	 * @return
+	 */
+	private static List<Integer> getNumFactors(int num) {
+		List<Integer> factors = new ArrayList<>();
+		for(int i = 2 ; i <= num/2; i++) {
+			if (num % i == 0) {
+				factors.add(i);
+			}
+		}
+		return factors;
+	}
+	
 	public static void main(String[] args) {
 		// Test arrayUnique()
 		System.out.println("Start: Test list puzzles");
@@ -395,6 +445,13 @@ public class ListImp {
 		System.out.println(" Toggled optimized");
 		printToggledOutputOtimized(10);
 		System.out.println();
+		
+		
+		int num = 12;
+		System.out.println("Num factors for " + num + " : ");
+		getNumFactors(num).forEach(System.out::println);
+		System.out.println("Line factors for " + num + " : ");
+		getLineFactors(num).forEach(System.out::println);
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");

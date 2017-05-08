@@ -6,4 +6,6 @@ public interface List<E> extends com.acs.data.Iterable<E> {
 	void insert(E val, int location);
 	void delete(int location);
 	int size();
+	boolean isEmpty();
+	E get(int index);
 }

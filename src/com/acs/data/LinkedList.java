@@ -68,10 +68,12 @@ public class LinkedList<E> implements List<E> {
 	// Methods:
 	LinkedList() {}
 	
+	@Override
 	public int size() {
 		return size;
 	}
 	
+	@Override
 	public boolean isEmpty() {
 		return size == 0;
 	}
@@ -79,6 +81,18 @@ public class LinkedList<E> implements List<E> {
 	@Override
 	public void add(E val) {
 		addLast(val);
+	}
+	
+	@Override
+	public E get(int index) {
+		if (index >= size) {
+			throw new IndexOutOfBoundsException();
+		}
+		Iterator<E> itr = this.iterator();
+		for (int i = 0; i < index; i++) {
+			itr.next();
+		}
+		return itr.next();
 	}
 	
 	public void addLast(E val) {

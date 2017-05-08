@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 public class MapImp {	
 	public static Map<Integer, Integer> histogram(int... data) {
 		Map<Integer, Integer> map = new HashMap<>();
@@ -196,6 +199,40 @@ public class MapImp {
 		}
 	}
 	
+	/**
+	 * Print by all common ingredents
+	 *  fried rice : rice, oil, onions
+	 *  salad: lettuce
+	 *  pasta: rice, tomotos
+	 *  
+	 *  (fried rice, pasta) , (salad)
+	 *  
+	 *  
+	 *  
+	 *  https://www.careercup.com/question?id=5754648968298496
+	 * @param recipies
+	 */
+	public static void printByCommonIngredents(Map<String, List<String>> recipies) {
+		Map<String, List<String>> reverseMap = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : recipies.entrySet()) {
+			for (String item : entry.getValue()) {
+				reverseMap.putIfAbsent(item, new ArrayList<String>());
+				reverseMap.get(item).add(entry.getKey());
+			}
+		}
+		for (Map.Entry<String, List<String>> entry : reverseMap.entrySet()) {
+			// Skip one and only ingredient.
+			if (entry.getValue().size() == 1) {
+				continue;
+			}
+			System.out.print("(");
+			for (String item : entry.getValue()) {
+				System.out.print(item + ",");
+			}
+			System.out.println(")");
+		}
+	}
+	
 
 	
 	@SuppressWarnings("serial")
@@ -234,7 +271,11 @@ public class MapImp {
 		System.out.println("Now for sorted");
 		printUniqueNumsForSorted(uniqueData);
 		
-		
+		System.out.println("Print common ingredients ");
+		 Map<String, List<String>> recipies = ImmutableMap.of("fried rice", ImmutableList.of("rice", "oil", "onion"),
+				 "salad", ImmutableList.of("lettuice"), "pasta", ImmutableList.of("rice", "tomotos"));
+		printByCommonIngredents(recipies);
+		System.out.println();
 		System.out.println("Done: Testing puzzles with Hashmaps");
 
 	}
