@@ -1,6 +1,7 @@
 package com.acs.algo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,6 +234,51 @@ public class MapImp {
 		}
 	}
 	
+	
+	/* This class will be given a list of words (such as might be tokenized
+	 * from a paragraph of text), and will provide a method that takes two
+	 * words and returns the shortest distance (in words) between those two
+	 * words in the provided text.
+	 * Example:
+	 *   WordDistanceFinder finder = new WordDistanceFinder(Arrays.asList("the", "quick", "brown", "fox", "quick"));
+	 *   assert(finder.distance("fox", "the") == 3);
+	 *   assert(finder.distance("quick", "fox") == 1);
+	 *
+	 * "quick" appears twice in the input. There are two possible distance values for "quick" and "fox":
+	 *     (3 - 1) = 2 and (4 - 3) = 1.
+	 * Since we have to return the shortest distance between the two words we return 1.
+	 */
+	public static class WordDistanceFinder {
+	    Map<String, List<Integer>> map = new HashMap<>();
+	    public WordDistanceFinder (List<String> words) {
+	        int i =0;
+	        for (String word: words) {
+	           map.putIfAbsent(word, new ArrayList<>());
+	           map.get(word).add(i++);
+	        }
+	    }
+	    public int distance (String wordOne, String wordTwo) {
+	        if (map.get(wordOne) == null || map.get(wordTwo) == null) {
+	            return -1;
+	        }
+	        int maxIndexOne = map.get(wordOne).size();
+	        int maxIndexTwo = map.get(wordTwo).size();
+	        int indexOne = 0;
+	        int indexTwo = 0;
+	        int minDistance = Integer.MAX_VALUE;
+	        while (indexOne < maxIndexOne && indexTwo < maxIndexTwo) {
+	             int valueOne = map.get(wordOne).get(indexOne);
+	             int valueTwo = map.get(wordTwo).get(indexTwo);
+	             minDistance = Math.min(minDistance, Math.abs(valueOne - valueTwo));
+	             if (valueOne < valueTwo) {
+	                indexOne++;
+	             } else {
+	                indexTwo++;
+	             }
+	         }
+	        return minDistance;
+	    }
+	}
 
 	
 	@SuppressWarnings("serial")
@@ -276,6 +322,11 @@ public class MapImp {
 				 "salad", ImmutableList.of("lettuice"), "pasta", ImmutableList.of("rice", "tomotos"));
 		printByCommonIngredents(recipies);
 		System.out.println();
+		
+		 WordDistanceFinder finder = new WordDistanceFinder(Arrays.asList("the", "quick", "brown", "fox", "quick"));
+		 assert(finder.distance("fox", "the") == 3);
+		 assert(finder.distance("quick", "fox") == 1);
+		
 		System.out.println("Done: Testing puzzles with Hashmaps");
 
 	}

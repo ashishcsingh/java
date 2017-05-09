@@ -967,6 +967,73 @@ public class NodeImp {
         }
         return nodeLeft;
     }
+    
+    static public interface NestedInteger
+    {
+        /** @return true if this NestedInteger holds a single integer, rather than a nested list */
+        boolean isInteger();
+     
+        /** @return the single integer that this NestedInteger holds, if it holds a single integer
+         * Return null if this NestedInteger holds a nested list */
+        Integer getInteger();
+     
+        /** @return the nested list that this NestedInteger holds, if it holds a nested list
+         * Return null if this NestedInteger holds a single integer */
+        List<NestedInteger> getList();
+    }
+    
+    static class NestedIntegerImpl implements NestedInteger {
+    	int data;
+    	List<NestedInteger> list;
+    	boolean isDigit = false;
+    	
+    	NestedIntegerImpl(int data) {
+    		this.data = data;
+    		this.isDigit = true;
+    	}
+    	
+    	NestedIntegerImpl(List<NestedInteger> list) {
+    		this.list = list;
+    		this.isDigit = false;
+    	}
+    	
+		@Override
+		public boolean isInteger() {
+			if (isDigit) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public Integer getInteger() {
+			return data;
+		}
+
+		@Override
+		public List<NestedInteger> getList() {
+			return list;
+		}
+    }
+    
+    public static int depthSum (List<NestedInteger> input)
+    {
+        return depthSumHeight(input, 1);
+    }
+
+    private static int depthSumHeight(List<NestedInteger> input, int height) {
+       int sum = 0;
+       for (NestedInteger ni : input) {
+          if (ni.isInteger()) {
+             sum += ni.getInteger() * height;
+          } else {
+             sum += depthSumHeight(ni.getList(), height + 1);
+          }
+       }
+       return sum;
+    }
+    
 
 	/**
 	 * Tester methods.
@@ -1147,6 +1214,11 @@ public class NodeImp {
        n1Parent.right.parent = n1Parent;
        assert lcaWithParent(n1Parent, 2, 3) == n1Parent;
 		
+       // NestedInteger test.
+       NestedInteger ni = new NestedIntegerImpl(Arrays.asList(new NestedIntegerImpl(1), new NestedIntegerImpl(1)));
+       List<NestedInteger> listsNi = Arrays.asList(ni, new NestedIntegerImpl(2), ni);
+       assert depthSum(listsNi) == 10;
+       
 		System.out.println();
 		// Means no assert failure.
 		System.out.println("Done: Testing Graph related puzzles");
