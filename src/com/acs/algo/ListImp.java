@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
 
 public class ListImp {
 	public static int[] arrayUnique(int[] data) {

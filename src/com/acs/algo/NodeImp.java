@@ -1190,7 +1190,7 @@ public class NodeImp {
 		assert depth(nDeep) == 4;
 		assert nDeep.left.left.left.data == 1;
 		
-		Deque resultPath = new LinkedList<>();
+		Deque<Integer> resultPath = new LinkedList<>();
 		pathToNode(nDeep, 2, new LinkedList<Integer>(), resultPath);
 		System.out.println("Path to 2 should be : 6532 : " + resultPath);
 		// Lowest common ancestor for a binary tree.
