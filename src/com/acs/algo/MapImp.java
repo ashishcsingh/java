@@ -1,12 +1,20 @@
 package com.acs.algo;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
+import com.acs.algo.SetImp.Summable;
+import com.acs.algo.SetImp.SummableImpl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -18,7 +26,7 @@ public class MapImp {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * least K repeated nums.
 	 * @param data
@@ -35,7 +43,7 @@ public class MapImp {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Count all combinations of coin flips to reach the sum.
 	 * @param cache
@@ -68,7 +76,7 @@ public class MapImp {
 		cache.put(sum, result);
 		return result;
 	}
-	
+
 	/**
 	 * fibinocci using caching.
 	 * @param n
@@ -85,7 +93,7 @@ public class MapImp {
 		cache.put(n, fibinocci(n - 1, cache) + fibinocci(n - 2, cache));
 		return cache.get(n);
 	}
-	
+
 	/**
 	 *  Count Conversion int to char 121 => 3
 	 * @param digits
@@ -106,7 +114,7 @@ public class MapImp {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Minimum coin denomination to reach a target.
 	 * @param cache
@@ -134,7 +142,7 @@ public class MapImp {
 		cache.put(sum, result);
 		return result;
 	}
-	
+
 	/**
 	 * Compute execution and cooling cost for set of tasks.
 	 * Same task would take cooling time.
@@ -157,8 +165,8 @@ public class MapImp {
 		}
 		return current;
 	}
-	
-	
+
+
 	/**
 	 * Print unique nums when not sorted.
 	 * @param data
@@ -180,7 +188,7 @@ public class MapImp {
 		}
 		System.out.println();
 	}
-	
+
 	public static void printUniqueNumsForSorted(int[] data) {
 		System.out.println("Sorted Unqiue nums : ");
 		if (data.length == 1) {
@@ -196,7 +204,7 @@ public class MapImp {
 			System.out.print(data[data.length - 1] + ", ");
 		}
 	}
-	
+
 	/**
 	 * Print by all common ingredents
 	 *  fried rice : rice, oil, onions
@@ -230,8 +238,8 @@ public class MapImp {
 			System.out.println(")");
 		}
 	}
-	
-	
+
+
 	/* This class will be given a list of words (such as might be tokenized
 	 * from a paragraph of text), and will provide a method that takes two
 	 * words and returns the shortest distance (in words) between those two
@@ -246,49 +254,125 @@ public class MapImp {
 	 * Since we have to return the shortest distance between the two words we return 1.
 	 */
 	public static class WordDistanceFinder {
-	    Map<String, List<Integer>> map = new HashMap<>();
-	    public WordDistanceFinder (List<String> words) {
-	        int i =0;
-	        for (String word: words) {
-	           map.putIfAbsent(word, new ArrayList<>());
-	           map.get(word).add(i++);
-	        }
-	    }
-	    public int distance (String wordOne, String wordTwo) {
-	        if (map.get(wordOne) == null || map.get(wordTwo) == null) {
-	            return -1;
-	        }
-	        int maxIndexOne = map.get(wordOne).size();
-	        int maxIndexTwo = map.get(wordTwo).size();
-	        int indexOne = 0;
-	        int indexTwo = 0;
-	        int minDistance = Integer.MAX_VALUE;
-	        while (indexOne < maxIndexOne && indexTwo < maxIndexTwo) {
-	             int valueOne = map.get(wordOne).get(indexOne);
-	             int valueTwo = map.get(wordTwo).get(indexTwo);
-	             minDistance = Math.min(minDistance, Math.abs(valueOne - valueTwo));
-	             if (valueOne < valueTwo) {
-	                indexOne++;
-	             } else {
-	                indexTwo++;
-	             }
-	         }
-	        return minDistance;
-	    }
+		Map<String, List<Integer>> map = new HashMap<>();
+		public WordDistanceFinder (List<String> words) {
+			int i =0;
+			for (String word: words) {
+				map.putIfAbsent(word, new ArrayList<>());
+				map.get(word).add(i++);
+			}
+		}
+		public int distance (String wordOne, String wordTwo) {
+			if (map.get(wordOne) == null || map.get(wordTwo) == null) {
+				return -1;
+			}
+			int maxIndexOne = map.get(wordOne).size();
+			int maxIndexTwo = map.get(wordTwo).size();
+			int indexOne = 0;
+			int indexTwo = 0;
+			int minDistance = Integer.MAX_VALUE;
+			while (indexOne < maxIndexOne && indexTwo < maxIndexTwo) {
+				int valueOne = map.get(wordOne).get(indexOne);
+				int valueTwo = map.get(wordTwo).get(indexTwo);
+				minDistance = Math.min(minDistance, Math.abs(valueOne - valueTwo));
+				if (valueOne < valueTwo) {
+					indexOne++;
+				} else {
+					indexTwo++;
+				}
+			}
+			return minDistance;
+		}
 	}
 
-	
+	/**
+	 * Get all connected contacts via DFS
+	 * @param contact
+	 * @param contactToEmail
+	 * @param emailToContact
+	 * @return
+	 */
+	public static Set<String> connectedContacts(String contact, Map<String, Collection<String>> contactToEmail, Map<String, Collection<String>> emailToContact) {
+		Set<String> visited = new HashSet<>();
+		Deque<String> stack = new ArrayDeque<>();
+		stack.push(contact);
+		while(!stack.isEmpty()) {
+			String current = stack.pop();
+			if (visited.contains(current)) {
+				continue;
+			}
+			for (String email : contactToEmail.get(current)) {
+				stack.addAll(emailToContact.get(email));
+			}
+			visited.add(current);
+		}
+		return visited;
+	}
+
+	/**
+	 * Reverse lookup from emailToContact and vice versa.
+	 * @param map
+	 * @return
+	 */
+	public static Map<String, Collection<String>> reverseLookup(Map<String, Collection<String>> map) {
+		Map<String, Collection<String>> output = new HashMap<>();
+		for (Entry<String, Collection<String>> entry : map.entrySet()) {
+			for (String val : entry.getValue()) {
+				output.putIfAbsent(val, new HashSet<>());
+				output.get(val).add(entry.getKey());
+			}
+		}
+		return output;
+	}
+
+
+	/**
+	 * https://www.careercup.com/question?id=5651199228379136
+	 * Test should return in O(1) whether there are two nums that totals the num.
+	 */
+	public static interface TwoSum {
+		public void store (int num);
+		public boolean test(int num);
+	}
+
+	public static class TwoSumImpl implements TwoSum {
+		Map<Integer, Integer> map = new HashMap<>();
+		@Override
+		public void store(int num) {
+			map.put(num, map.getOrDefault(num, 0) + 1);
+		}
+
+		@Override
+		public boolean test(int num) {
+			for (Entry<Integer, Integer> e : map.entrySet()) {
+				// If second part exists
+				if (map.containsKey(num - e.getKey())) {
+					// If second part is same as first part
+					if (num - e.getKey() == e.getKey()) {
+						// If second part does not exist separately
+						if (e.getValue() == 1) {
+							return false;
+						}
+						return true;
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		System.out.println("Start: Testing puzzles with Hashmaps");
 		assert Objects.equals(histogram(new int[]{2,1,3,4,2,1,3,4}), new HashMap<Integer, Integer>(){
-		{
-			put(2, 2);
-			put(1, 2);
-			put(3, 2);
-			put(4, 2);
-		}});
-		
+			{
+				put(2, 2);
+				put(1, 2);
+				put(3, 2);
+				put(4, 2);
+			}});
+
 		// Coin flips Dynamic programming.
 		int countFlips = coinDenominations(new HashMap<>(), new int[]{1, 2, 3}, 3);
 		System.out.println("Total count flips to sum 3 from 1,2,3 coins : " + countFlips);
@@ -296,34 +380,50 @@ public class MapImp {
 		System.out.println("Minimum flips to sum 10 from 1,2,3 coins : " + minCountFlips);
 		//assert countDigitToChars(new int[] {1,2,1}, 0) == 3;
 		System.out.println(" 121 => Chars : " + countDigitToChars(new int[] {1, 2, 1}, 0));
-		
-		
+
+
 		assert Objects.equals(leastKRepeatedNum(new int[] {5, 6, 5, 6, 1, 2}, 2), new HashMap<Integer, Integer>(){
-		{
-			put(5, 2);
-			put(6, 2);
-		}});
-		
+			{
+				put(5, 2);
+				put(6, 2);
+			}});
+
 		System.out.println(fibinocci(10, new HashMap<>()));
 		assert Objects.equals(fibinocci(10, new HashMap<>()), 55);
 		assert jobTimeWithCooling(new String[] {"A", "A"}, 3) == 5;
 		assert jobTimeWithCooling(new String[] {"A", "B", "A", "B" }, 3) == 6;
-		
+
 		int uniqueData[] = {1, 1, 2, 3, 4, 4, 5, 5};
 		printUniqueNums(uniqueData);
 		System.out.println("Now for sorted");
 		printUniqueNumsForSorted(uniqueData);
-		
+
 		System.out.println("Print common ingredients ");
-		 Map<String, List<String>> recipies = ImmutableMap.of("fried rice", ImmutableList.of("rice", "oil", "onion"),
-				 "salad", ImmutableList.of("lettuice"), "pasta", ImmutableList.of("rice", "tomotos"));
+		Map<String, List<String>> recipies = ImmutableMap.of("fried rice", ImmutableList.of("rice", "oil", "onion"),
+				"salad", ImmutableList.of("lettuice"), "pasta", ImmutableList.of("rice", "tomotos"));
 		printByCommonIngredents(recipies);
 		System.out.println();
-		
-		 WordDistanceFinder finder = new WordDistanceFinder(Arrays.asList("the", "quick", "brown", "fox", "quick"));
-		 assert(finder.distance("fox", "the") == 3);
-		 assert(finder.distance("quick", "fox") == 1);
-		
+
+		WordDistanceFinder finder = new WordDistanceFinder(Arrays.asList("the", "quick", "brown", "fox", "quick"));
+		assert(finder.distance("fox", "the") == 3);
+		assert(finder.distance("quick", "fox") == 1);
+
+		System.out.println("EmailToContact");
+		Map<String, Collection<String>> directory = ImmutableMap.of("ashish singh", ImmutableList.<String>of("ashishcsingh@gmail.com",
+				"singhashish37@gmail.com"), "ashish c singh", ImmutableList.<String>of("singhashish37@gmail.com"));
+		Map<String, Collection<String>> emailToContacts = reverseLookup(directory);
+		System.out.println(connectedContacts("ashish singh", directory, emailToContacts));
+
+		// Two parts should exist.
+		TwoSum sums = new TwoSumImpl();
+		sums.store(4);
+		sums.store(5);
+		sums.store(6);
+		assert !sums.test(7);
+		assert !sums.test(8);
+		assert sums.test(9);
+		assert sums.test(10);
+
 		System.out.println("Done: Testing puzzles with Hashmaps");
 
 	}

@@ -1034,6 +1034,50 @@ public class NodeImp {
        return sum;
     }
     
+    /**
+     * Given child, parent, isLeft relationship build tree.
+     * https://www.careercup.com/question?id=5668114807128064
+     * @author asingh
+     *
+     */
+    static class Relation {
+    	Integer parent;
+    	Integer child;
+    	boolean isLeft;
+    	Relation(Integer child, Integer parent, boolean isLeft) {
+    		this.child = child;
+    		this.parent = parent;
+    		this.isLeft = isLeft;
+    	}
+    }
+    
+    /**
+     * Builds tree using Relations.
+     * https://www.careercup.com/question?id=5668114807128064
+     * @param relations
+     * @return
+     */
+    public static Node buildTree(List<Relation> relations) {
+    	Node root = null;
+    	Map<Integer, Node> map = new HashMap<>();
+    	for (Relation r : relations) {
+    		if (r.parent == null) {
+    			map.putIfAbsent(r.child, new Node(r.child));
+    			root = map.get(r.child);
+    			continue;
+    		}
+			Node node = new Node(r.child);
+			map.putIfAbsent(r.parent, new Node(r.parent));
+			Node parent = map.get(r.parent);
+			if (r.isLeft) {
+				parent.left = node;
+			} else {
+				parent.right = node;
+			}
+			map.put(r.child, node);
+    	}
+    	return root;
+    }
 
 	/**
 	 * Tester methods.
@@ -1218,6 +1262,20 @@ public class NodeImp {
        NestedInteger ni = new NestedIntegerImpl(Arrays.asList(new NestedIntegerImpl(1), new NestedIntegerImpl(1)));
        List<NestedInteger> listsNi = Arrays.asList(ni, new NestedIntegerImpl(2), ni);
        assert depthSum(listsNi) == 10;
+       
+       List<Relation> relations = Arrays.asList(
+           new Relation(15, 20, true),
+           new Relation(19, 80, true),
+           new Relation(17, 20, false),
+           new Relation(16, 80, false),
+           new Relation(80, 50, false),
+           new Relation(50, null, false),
+           new Relation(20, 50, true));
+       Node root = buildTree(relations);
+       
+       assert root.data == 50;
+       assert root.left.data == 20;
+       assert root.right.data == 80;
        
 		System.out.println();
 		// Means no assert failure.

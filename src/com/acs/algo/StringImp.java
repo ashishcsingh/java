@@ -728,6 +728,34 @@ public class StringImp {
 		return false;
 	}
 	
+	/**
+	 * Roman to value
+	 * @param str
+	 * @return
+	 */
+	public static int romanValue(String str) {
+		int result = 0;
+		int lastVal = 1000, curVal = 0;
+		for(char c : str.toUpperCase().toCharArray()) {
+			switch(c) {
+				case 'I' : curVal = 1; break;
+				case 'V' : curVal = 5; break;
+				case 'X' : curVal = 10; break;
+				case 'L' : curVal = 50; break;
+				case 'C' : curVal = 100; break;
+				case 'D' : curVal = 500; break;
+				case 'M' : curVal = 1000; break;
+				default : return -1;
+			}
+			if (lastVal < curVal) {
+				result = result - 2 * lastVal;
+			}
+			result += curVal;
+			lastVal = curVal;
+		}
+		return result;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -821,6 +849,12 @@ public class StringImp {
         System.out.println();
         assert isRotation("abc", "cab");
         assert !isRotation("abc", "cba");
+        
+        // Roman testing
+        assert romanValue("XVI") == 16;
+        assert romanValue("XII") == 12;
+        assert romanValue("XIV") == 14;
+        
 
 		System.out.println("Done: Testing String related puzzles");
 	}

@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.primitives.Ints;
+
 public class ListImp {
 	public static int[] arrayUnique(int[] data) {
 		Set<Integer> set = new TreeSet<Integer>();
@@ -147,6 +149,31 @@ public class ListImp {
 			int pivotLoc = partition(data, start, end);
 			quickSort(data, start, pivotLoc - 1);
 			quickSort(data, pivotLoc, end);
+		}
+	}
+	
+	/**
+	 * Print NW to SE
+	 * https://www.careercup.com/question?id=5163286157852672
+	 * @param data
+	 */
+	public static void printNWToSE(int[][] data) {
+		if (data == null) {
+			return;
+		}
+		int max = data.length + data[0].length;
+		int xstart = -data.length + 1, ystart = data.length - 1;
+		for (int i = 0; i < max; i++) {
+			int x = Math.max(xstart++, 0);
+			int y = Math.max(ystart--, 0);
+			for (int j = 0; j < max; j++) {
+				if (y < data.length && x < data[0].length) {
+				  	System.out.print(data[y++][x++] + " ");
+				} else {
+					System.out.println();
+					break;
+				}
+			}	
 		}
 	}
 
@@ -382,6 +409,25 @@ public class ListImp {
 	}
 	
 	/**
+	 * https://www.careercup.com/question?id=5689376707182592
+	 * @param data
+	 * @return
+	 */
+	public static boolean canFormTriangle(int[] data) {
+		if (data.length < 3) {
+			return false;
+		}
+		List<Integer> sides = Ints.asList(data);
+		sides.sort( (a, b) -> a - b);
+		for (int i = 1; i< data.length - 1; i++) {
+			if (data[i-1] + data[i] > data[i + 1]) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Returns all mult factors.
 	 * @param num
 	 * @return
@@ -449,6 +495,17 @@ public class ListImp {
 		getNumFactors(num).forEach(System.out::println);
 		System.out.println("Line factors for " + num + " : ");
 		getLineFactors(num).forEach(System.out::println);
+		
+	    int arr[][] = new int[3][4];
+	    arr[0] = new int[] { 1,  2,  3,  4 };
+	    arr[1] = new int[] { 5,  6,  7,  8 };
+	    arr[2] = new int[] { 9, 10, 11, 12 };
+
+	    System.out.println("PrintNWtoSE");
+		printNWToSE(arr);
+		
+		assert canFormTriangle(new int[] {4, 2, 3});
+		assert canFormTriangle(new int[] {4, 11, 6}) == false;
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
