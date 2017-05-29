@@ -1,9 +1,12 @@
 package com.acs.algo;
 
 import java.util.AbstractMap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -289,6 +292,104 @@ public class QueueImp {
 		return output;
 	}
 	
+	/**
+	 * Parses line to RPN
+	 * @param line
+	 * @param operators
+	 * @param operands
+	 */
+	private static void parseReversePolishNotation(String line, Deque<Character> operators, Deque<Double> operands) {
+		String[] words = line.split("\\s");
+		boolean expectedNum = true;
+		for (String word : words) {
+			if (expectedNum) {
+			try {
+				Double operand = Double.parseDouble(word);
+				operands.push(operand);
+			} catch(NumberFormatException nfe)  
+			  {  
+				expectedNum = false;
+			  }
+			}
+			if (!expectedNum) {
+				if (word.matches("[+-/*]")) {
+					operators.push(word.charAt(0));
+				} else {
+					throw new IllegalStateException();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Input : 4 5 3 + /
+	 * 		 perform: 5 + 3 = 8
+	 * 				  4 / 8 = 0.5 
+	 * https://www.careercup.com/question?id=4906033149378560
+	 * @param line
+	 * @return
+	 */
+	public static Double computeReversePolishNotation(String line) {
+		float result = 0;
+		// Parse out line
+		Deque<Double> numStack = new ArrayDeque<>();
+		Deque<Character> OpsStack = new ArrayDeque<>();
+		parseReversePolishNotation(line, OpsStack, numStack);
+		for (char operator : OpsStack) {
+			double val1, val2;
+			switch(operator) {
+			case '+' : 
+				val2 = numStack.pop();
+				val1 = numStack.pop();
+				numStack.push(val1 + val2);
+				break;
+			case '-' : 
+				val2 = numStack.pop();
+				val1 = numStack.pop();
+				numStack.push(val1 - val2);
+				break;
+			case '*' : 
+				val2 = numStack.pop();
+				val1 = numStack.pop();
+				numStack.push(val1 * val2);
+				break;
+			case '/' : 
+				val2 = numStack.pop();
+				val1 = numStack.pop();
+				numStack.push(val1 / val2);
+				break;
+			}
+		}
+		return numStack.pop();
+	}
+	
+	/**
+	 * Check if data exists in a shifted sorted list.
+	 * https://www.careercup.com/question?id=5747740665446400
+	 * @param num
+	 * @param data
+	 * @return
+	 */
+	public static boolean shiftedBinarySearch(List<Integer> num, int data) {
+		// If empty.
+		if (num == null || num.size() == 0) {
+			return false;
+		}
+		int start = 0, end = num.size() - 1;
+		while (start <= end) {
+			int middle = (start + end) / 2;
+			if (num.get(middle) == data) {
+				return true;
+			}
+			if ((num.get(start) <= data && num.get(middle) > data) || 
+					(num.get(start) >= data && num.get(middle) < data)) {
+				end = middle - 1;
+			} else {
+				start = middle + 1;
+			}
+		}
+		return false;
+	}
 	
 	
 	public static void main(String[] args) {
@@ -348,6 +449,17 @@ public class QueueImp {
 		Collection<Integer> output2 = mergeKSortedArrays(lists2);
 		System.out.println("merged k sorted should be 1 to 12: ");
 		System.out.println(output2);
+		
+		// Reverse Polish Notation
+		// 4 + 5 + 6 - 5
+		assert computeReversePolishNotation("4 5 6 5 + + -") == 10.0F;
+		// 4 + 5 * 1
+		assert computeReversePolishNotation("4 5 1 + *") == 9.0F;
+		// 4 * 5 + 1
+		assert computeReversePolishNotation("1 4 5 + *") == 21.0F;
+		
+		assert shiftedBinarySearch(Arrays.asList(3,4,5,1,2), 3);
+		assert shiftedBinarySearch(Arrays.asList(3,4,5,1,2), 2);
 		
 		System.out.println("---  Done test");
 		

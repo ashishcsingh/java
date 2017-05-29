@@ -442,6 +442,37 @@ public class ListImp {
 		return factors;
 	}
 	
+	private static boolean isTriangle(Integer a, Integer b, Integer c) {
+		return a + b > c && a + c > b && b + c > a;
+	}
+	
+	/**
+	 * Return all permutations of valid triangle constrained sides.
+	 * All abc : a + b > c && a + c > b && b + c > a
+	 * @param data
+	 * @return
+	 */
+	public static List<List<Integer>> triangleTriplets(List<Integer> data) {
+		List<List<Integer>> output = new ArrayList<>();
+		if (data == null || data.size() < 3) {
+			return output;
+		}
+		data.sort( (a, b) -> a - b);
+		for (int i = 0; i < data.size(); i++) {
+			for (int j = i + 1; j < data.size(); j++) {
+				for (int k = j + 1; k < data.size(); k++) {
+					int a = data.get(i);
+					int b = data.get(j);
+					int c = data.get(k);
+					if (isTriangle(a, b, c)) {
+						output.add(Arrays.asList(a, b, c));
+					}
+				}
+			}
+		}
+		return output;
+	}
+	
 	public static void main(String[] args) {
 		// Test arrayUnique()
 		System.out.println("Start: Test list puzzles");
@@ -506,6 +537,9 @@ public class ListImp {
 		
 		assert canFormTriangle(new int[] {4, 2, 3});
 		assert canFormTriangle(new int[] {4, 11, 6}) == false;
+		
+		System.out.println("Triangle contrained output: ");
+		System.out.println(triangleTriplets(Arrays.asList(3, 4, 5, 6, 7)));
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");

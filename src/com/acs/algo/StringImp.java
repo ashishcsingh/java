@@ -756,6 +756,46 @@ public class StringImp {
 		return result;
 	}
 	
+	
+	/**
+	 * Parse double
+	 * 1. +- 44.221
+	 * https://www.careercup.com/question?id=5747740665446400
+	 * @param str
+	 * @return
+	 */
+	public static double parseNumber(String str) {
+		if (str == null || !str.matches("\\+?\\-?\\d+.?\\d+")) {
+			throw new IllegalArgumentException();
+		}
+		boolean negative = false;
+		str = str.trim();
+		char[] chars = str.toCharArray();
+		int i = 0;
+		if (chars[0] == '-') {
+			negative = true;
+			i++;
+		} else if (chars[0] == '+') {
+			i++;
+		}
+		double val = 0.0;
+		while(i < str.length() && chars[i] != '.') {
+			val *= 10;
+			val += chars[i] - '0';
+			i++;
+		}
+		double afterDotVal = 1;
+		if (chars[i] == '.') {
+			i++;
+			while(i < str.length()) {
+				afterDotVal *= 0.1;
+				val += (chars[i] - '0') * afterDotVal;
+				i++;
+			}
+		}
+		return negative ? - val : val;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -855,7 +895,8 @@ public class StringImp {
         assert romanValue("XII") == 12;
         assert romanValue("XIV") == 14;
         
-
+        assert parseNumber("-4.215") == -4.215;
+        
 		System.out.println("Done: Testing String related puzzles");
 	}
 }
