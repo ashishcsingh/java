@@ -466,11 +466,42 @@ public class ListImp {
 					int c = data.get(k);
 					if (isTriangle(a, b, c)) {
 						output.add(Arrays.asList(a, b, c));
+					} else {
+						break;
 					}
 				}
 			}
 		}
 		return output;
+	}
+	
+	/**
+	 * data[x][y] == true then x follows y.
+	 * Influencer is the one that is followed by everyone and does not follow anyone.
+	 * @param data
+	 * https://www.careercup.com/question?id=6482755168763904
+	 * @return
+	 */
+	public static int influencer(boolean[][] data) {
+		if (data == null) {
+			return -1;
+		}
+		for(int i=0; i<data.length; i++) {
+			boolean isInfluencer = true;
+			for (int j=0; j < data.length; j++) {
+				if (i == j) {
+					continue;
+				}
+				if (data[i][j] || !data[j][i]) {
+					isInfluencer = false;
+					break;
+				}
+			}
+			if (isInfluencer) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	public static void main(String[] args) {
@@ -540,6 +571,14 @@ public class ListImp {
 		
 		System.out.println("Triangle contrained output: ");
 		System.out.println(triangleTriplets(Arrays.asList(3, 4, 5, 6, 7)));
+		
+		// Influencer 
+		boolean[][] influencerData = {
+				{false, true, true},
+				{true, false, true},
+				{false, false, false}
+		};
+		assert influencer(influencerData) == 2;
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");

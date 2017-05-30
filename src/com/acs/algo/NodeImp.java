@@ -1078,7 +1078,57 @@ public class NodeImp {
     	}
     	return root;
     }
+    
 
+	/**
+	 * 
+	 * Covert right sided tree to upside down.
+	 *     1
+	 *   2   3
+	 * 4  5
+	 * 
+	 *  To 
+	 *     4
+	 *   5  2
+	 *     3  1
+	 *   
+	 * https://www.careercup.com/question?id=6266917077647360
+	 * @param root
+	 * @return
+	 */
+	public static Node upSideDown(Node root) {
+		if (root == null) {
+			return root;
+		}
+		Deque<Node> stack = createStack(root);
+		return createTree(stack);
+	}
+	
+	private static Deque<Node> createStack(Node root) {
+		Deque<Node> stack = new ArrayDeque<>();
+		stack.push(root);
+		Node cur = stack.peek();
+		while(cur.left != null) {
+			stack.push(cur.right);
+			stack.push(cur.left);
+			cur = stack.peek();
+		}
+		return stack;
+	}
+	
+	private static Node createTree(Deque<Node> stack) {
+		Node root = stack.pop();
+		Node cur = root;
+		while(!stack.isEmpty()) {
+			Node left = stack.pop();
+			Node right = stack.pop();
+			cur.left = left;
+			cur.right = right;
+			cur = cur.right;
+		}
+		return root;
+	}
+	
 	/**
 	 * Tester methods.
 	 * @param args
@@ -1276,6 +1326,12 @@ public class NodeImp {
        assert root.data == 50;
        assert root.left.data == 20;
        assert root.right.data == 80;
+       
+       Node n23456 = new Node(new Node(new Node(5), new Node(6), 4), new Node(3), 2);
+       Node flippedNode = upSideDown(n23456);
+       assert flippedNode.data == 5;
+       assert flippedNode.left.data == 6;
+       assert flippedNode.right.data == 4;
        
 		System.out.println();
 		// Means no assert failure.

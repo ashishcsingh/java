@@ -796,6 +796,38 @@ public class StringImp {
 		return negative ? - val : val;
 	}
 	
+	/**
+	 * Max palindrom length if any length data can be removed.
+	 * https://www.careercup.com/question?id=5705985515585536
+	 * @param data
+	 * @param start
+	 * @param end
+	 * @param cache
+	 * @return
+	 */
+	public static int maxPalindrome(Integer[] data, int start, int end, Integer[][] cache) {
+		if (data == null) {
+			return 0;
+		}
+		if (start > end) {
+			return 0;
+		}
+		if (cache[start][end] != null) {
+			return cache[start][end];
+		}
+		int result = 0;
+		if (start == end) {
+			result = 1;
+		} else if (data[start] == data[end]) {
+			result = 2 + maxPalindrome(data, start + 1, end - 1, cache);
+		} else {
+			result = Math.max(maxPalindrome(data, start + 1, end, cache),
+					maxPalindrome(data, start, end - 1, cache));
+		}
+		cache[start][end] = result;
+		return result;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -896,6 +928,9 @@ public class StringImp {
         assert romanValue("XIV") == 14;
         
         assert parseNumber("-4.215") == -4.215;
+        
+        // Max palindrom length
+        assert maxPalindrome(Arrays.asList(1,2,3,4,5,4,3,2,1,2,3,4,5).toArray(new Integer[0]), 0, 12, new Integer[13][13]) == 9;
         
 		System.out.println("Done: Testing String related puzzles");
 	}

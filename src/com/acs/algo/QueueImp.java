@@ -391,6 +391,42 @@ public class QueueImp {
 		return false;
 	}
 	
+	static class Point2D {
+		float x, y;
+		Point2D(float x, float y) {
+			this.x = x;
+			this.y = y;
+		}
+		@Override
+		public String toString() {
+			return "Point2D{"+x+", "+y+"}";
+		}
+	}
+	
+	/**
+	 * findNearestPoints
+	 * https://www.careercup.com/question?id=4758558331633664
+	 * @param points
+	 * @param target
+	 * @param count
+	 * @return
+	 */
+	public static Collection<Point2D> findNearestPoints(Collection<Point2D> points, Point2D target, int count) {
+		Queue<Point2D> pq = new PriorityQueue<>(count + 1, (a, b) -> {
+			float distanceA = (target.x - a.x) * (target.x - a.x) +  (target.y - a.y) * (target.y - a.y);
+			float distanceB = (target.x - b.x) * (target.x - b.x) +  (target.y - b.y) * (target.y - b.y);
+			return (int) ((int) distanceB - distanceA); });
+		for (Point2D point : points) {
+			if (count >= pq.size()) {
+				pq.add(point);
+			} else {
+				pq.add(point);
+				pq.remove();
+			}
+		}
+		return pq;
+	}
+	
 	
 	public static void main(String[] args) {
 		// Test topN()
@@ -460,6 +496,9 @@ public class QueueImp {
 		
 		assert shiftedBinarySearch(Arrays.asList(3,4,5,1,2), 3);
 		assert shiftedBinarySearch(Arrays.asList(3,4,5,1,2), 2);
+		
+		Collection<Point2D> point2Ds = Arrays.asList(new Point2D(3,4), new Point2D(10,10), new Point2D(1,1), new Point2D(2,2));
+		System.out.println(findNearestPoints(point2Ds, new Point2D(1, 1), 2));
 		
 		System.out.println("---  Done test");
 		

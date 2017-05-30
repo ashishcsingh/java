@@ -1,6 +1,7 @@
 package com.acs.algo;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -76,6 +77,15 @@ public class SetImp {
 		}
 	}
 	
+	static class Interval {
+		int start;
+		int end;
+		Interval(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+	}
+	
 	/**
 	 * Merges pairs on insert.
 	 * https://www.careercup.com/question?id=5766696197423104
@@ -105,6 +115,22 @@ public class SetImp {
 		pairs.add(insert);
 	}
 	
+	
+	/**
+	 * Covered range.
+	 * @param intervals
+	 * @return
+	 */
+	public static int coveredRange(List<Interval> intervals) {
+		Set<Integer> data = new HashSet<>();
+		for (Interval i : intervals) {
+			for (int val = i.start; val < i.end; val++) {
+				data.add(val);
+			}
+		}
+		return  data.size();
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Testing setImp tests");
 		assert findDuplicate(new int[]{1,2,3,3}) == 3 : "Should be 3";
@@ -118,6 +144,7 @@ public class SetImp {
 		assert sums.test(8);
 		assert sums.test(9);
 		assert sums.test(10);
+		assert coveredRange(Arrays.asList(new Interval(3, 4), new Interval(3, 6))) == 3;
 		System.out.println("Done setImp tests");
 	}
 }
