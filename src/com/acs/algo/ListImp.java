@@ -568,6 +568,31 @@ public class ListImp {
 		return -1;
 	}
 	
+	/**
+	 * Given two arrays of any size, compute sum from back.
+	 * https://www.careercup.com/question?id=5631950045839360
+	 * @param args
+	 */
+	public static int[] sumTwoArrays(int[] a, int[] b) {
+		if (a.length > b.length) {
+			return sumTwoArraysInt(a, b);
+		} else {
+			return sumTwoArraysInt(b, a);
+		}
+	}
+	
+	private static int[] sumTwoArraysInt(int[] a, int[] b) {
+		int[] c = new int[a.length + 1];
+		for (int i = 1; i <= a.length; i++) {
+			c[c.length - i] = a[a.length - i] + (b.length < i ? 0 : b[b.length - i]);
+			if (c[c.length - i] > 10) {
+				c[c.length - i] -= 10;
+				c[c.length - i - 1] += 1;
+			}
+		}
+		return c;
+	}
+	
 	public static void main(String[] args) {
 		// Test arrayUnique()
 		System.out.println("Start: Test list puzzles");
@@ -645,6 +670,11 @@ public class ListImp {
 		assert influencer(influencerData) == 2;
 		
 		assert biggestVm(ImmutableList.of(ImmutableMap.of("cpu", 2.4f, "mem", 8.0f), ImmutableMap.of("cpu", 3.0f, "mem", 16.0f))) == 1;
+		
+		int a[] = {1, 2, 3, 4};
+		int b[] = {1, 2, 3};
+		int c[] = sumTwoArrays(a, b);
+		System.out.println(Arrays.toString(c));
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
