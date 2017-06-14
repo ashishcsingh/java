@@ -5,10 +5,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.awt.Point;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -119,6 +122,7 @@ public class SetImp {
 	/**
 	 * Covered range.
 	 * @param intervals
+	 * Lots of space.
 	 * @return
 	 */
 	public static int coveredRange(List<Interval> intervals) {
@@ -130,6 +134,177 @@ public class SetImp {
 		}
 		return  data.size();
 	}
+	
+	/**
+	 * Minimal space
+	 * @param intervals
+	 * @return
+	 */
+	public static int coveredRange2(List<Interval> intervals) {
+		int totalDistance = 0;
+		Interval last = new Interval(0, 0);
+		intervals.sort( (a, b) -> a.start - b.start);
+		for (Interval i : intervals) {
+			if (i.start > last.end) {
+				totalDistance += (i.end - i.start);
+				last = i;
+			} else if (i.start == last.start && i.end > last.end) {
+				totalDistance += (i.end - last.end);
+				last = i;
+			} else if (i.start < last.end && i.end > last.end) {
+				totalDistance += (i.end - last.end);
+				last = i;
+			}
+		}
+		return totalDistance;
+	}
+	
+	/**
+	 * Maze is filled with player ids.
+	 * Find points sprted by the biggest same player area.
+	 * @author asingh
+	 *
+	 */
+	static class MazeSolver {
+		private int[][] maze;
+		
+		private Set<Point> getTeamPoints(int player) {
+			Set<Point> teamPoints = new HashSet<> ();
+			for (int y = 0; y < maze.length; y++) {
+				for (int x = 0; x < maze[0].length; x++) {
+					if (maze[y][x] == player) {
+						teamPoints.add(new Point(y, x));
+					}
+				}
+			}
+			//System.out.println("debug total points found : " + teamPoints);
+			return teamPoints;
+		}
+		
+		public MazeSolver(int size) {
+			Random random = new Random();
+			int[][] maze = new int[size][size];
+			for(int i = 0; i<size; i++) {
+				for(int j = 0; j<size; j++) {
+					maze[i][j] = random.nextInt(size);
+				}
+			}
+			this.maze = maze;
+		}
+		
+		public MazeSolver(int[][] maze) {
+			this.maze = maze;
+		}
+		
+		/**
+		 * Get points sorted by largest same player area.
+		 * @param player
+		 * @return
+		 */
+		public Collection<Point> getMaxHitPoints(int player) {
+			Set<Point> points = getTeamPoints(player);
+			List<Set<Point>> areas = new ArrayList<>();
+			while (!points.isEmpty()) {
+				Point cur = getAny(points);
+				Set<Point> connected = new HashSet<>();
+				neighbors(cur, connected, player);
+				//System.out.println("debug neighbors points found : " + connected + " for " + cur);
+				areas.add(connected);
+				points.removeAll(connected);
+			}
+			// Sorting based upon area size.
+			areas.sort( (a, b) -> (b.size() - a.size()));
+			List<Point> result = new ArrayList<>();
+			//System.out.println("debug areas " + areas.size());
+			// Take any point in that set.
+			for (Set<Point> set : areas) {
+				result.add(getAny(set));
+			}
+			return result;
+		}
+		
+		/**
+		 * Return any random point from collection.
+		 * @param points
+		 * @return
+		 */
+		private Point getAny(Collection<Point> points) {
+			for (Point p : points) {
+				return p;
+			}
+			return null;
+		}
+		
+		/**
+		 * DFS to all 4 directions (up, down, left and right) for same player.
+		 * @param cur
+		 * @param visited
+		 * @param player
+		 */
+		private void neighbors(Point cur, Set<Point> visited, int player) {
+			if (!visited.contains(new Point(cur.y, cur.x))) {
+				if (maze[cur.y][cur.x] == player) {
+					visited.add(new Point(cur.y, cur.x));
+				}
+				if (cur.y >= 1 && player == maze[cur.y-1][cur.x]) {
+					neighbors(new Point(cur.y - 1, cur.x), visited, player);
+				}
+				if (cur.x >= 1 && player == maze[cur.y][cur.x-1]) {
+					neighbors(new Point(cur.y, cur.x - 1), visited, player);
+				}
+				if (cur.y < maze.length-1 && player == maze[cur.y+1][cur.x]) {
+					neighbors(new Point(cur.y + 1, cur.x), visited, player);
+				}
+				if (cur.x < maze[0].length-1 && player == maze[cur.y][cur.x+1]) {
+					neighbors(new Point(cur.y, cur.x+1), visited, player);
+				}
+			}
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("==== MAZE ====");
+			for(int i = 0; i < maze.length; i++) {
+				sb.append("\n");
+				for(int j = 0; j < maze.length; j++) {
+					sb.append(maze[i][j]);
+				}
+			}
+			return sb.toString();
+		}
+		
+		/**
+		 * Point (y, x) aware of hashCode(), equals() and toString().
+		 * @author asingh
+		 *
+		 */
+		static class Point {
+			int y, x;
+			Point(int y, int x) {
+				this.y = y;
+				this.x = x;
+			}
+			
+			@Override
+			public int hashCode() {
+				return x * x + y * y;
+			}
+			
+			@Override
+			public boolean equals(Object other) {
+				if (other == null || this.getClass() != other.getClass()) {
+					return false;
+				}
+				Point check = (Point) other;
+				return this.x == check.x && this.y == check.y;
+			}
+			@Override
+			public String toString() {
+				return "{Y:"+y+",X:"+x+"}";
+			}
+		}
+	}
+	
 	
 	public static void main(String[] args) {
 		System.out.println("Testing setImp tests");
@@ -145,6 +320,16 @@ public class SetImp {
 		assert sums.test(9);
 		assert sums.test(10);
 		assert coveredRange(Arrays.asList(new Interval(3, 4), new Interval(3, 6))) == 3;
+		assert coveredRange2(Arrays.asList(new Interval(3, 4), new Interval(3, 6))) == 3;
+		
+
+		int mazeSize = 5, mazePlayer = 1;
+		System.out.println("For maze size : " + mazeSize);
+		System.out.println("For maze player : " + mazePlayer);
+		MazeSolver ms = new MazeSolver(mazeSize);
+		System.out.println(ms);
+		System.out.println(ms.getMaxHitPoints(mazePlayer));
+		
 		System.out.println("Done setImp tests");
 	}
 }

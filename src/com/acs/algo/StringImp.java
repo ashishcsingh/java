@@ -626,6 +626,23 @@ public class StringImp {
 	}
 	
 	/**
+	 * jab = > 012
+	 * Mod 10 each character.
+	 * @param str
+	 * @return
+	 */
+	public static String convertToDigit(String str) {
+		if (str == null || !str.matches("[a-zA-Z]*")) {
+			throw new IllegalArgumentException();
+		}
+		StringBuilder sb = new StringBuilder();
+		for(char c : str.toLowerCase().toCharArray()) {
+			sb.append((c - 'a' + 1) % 10);
+		}
+		return sb.toString();
+	}
+	
+	/**
 	 * str can take 0..9 and +,-
 	 * ex. 43 + 12 - 3
 	 * @param str
@@ -828,6 +845,33 @@ public class StringImp {
 		return result;
 	}
 	
+	/**
+	 * Finds min distance between indexes of words.
+	 * https://www.careercup.com/question?id=6051601991073792
+	 * @param list
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static int minDistanceWords(String list, String a, String b) {
+		int min = Integer.MAX_VALUE;
+		int ai = -1, bi = -1;
+		String[] words = list.toLowerCase().split("\\W+");
+		int i = 0;
+		for (String word: words) {
+			if (word.equals(a)) {
+				ai = i;
+			} else if (word.equals(b)) {
+				bi = i;
+			}
+			if (ai != -1 && bi != -1) {
+				min = Math.min(min, Math.abs(ai - bi));
+			}
+			i++;
+		}
+		return min;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -931,6 +975,10 @@ public class StringImp {
         
         // Max palindrom length
         assert maxPalindrome(Arrays.asList(1,2,3,4,5,4,3,2,1,2,3,4,5).toArray(new Integer[0]), 0, 12, new Integer[13][13]) == 9;
+        
+        assert minDistanceWords("world hello super man and woman welcome man to world", "man", "world") == 2;
+        
+        assert convertToDigit("jab").equals("012");
         
 		System.out.println("Done: Testing String related puzzles");
 	}

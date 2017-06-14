@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -362,6 +363,7 @@ public class QueueImp {
 		}
 		return numStack.pop();
 	}
+
 	
 	/**
 	 * Check if data exists in a shifted sorted list.
@@ -427,6 +429,114 @@ public class QueueImp {
 		return pq;
 	}
 	
+	/**
+	 * Basic queue for storing generic data.
+	 * @author asingh
+	 *
+	 * @param <T>
+	 */
+	
+	public static interface BasicQueue<T> {
+		public boolean add(T val);
+		public T remove();
+	}
+	
+	public static class BasicQueueImp<T> implements BasicQueue<T> {
+		private int capacity, start = 0, length = 0;
+		private List<T> data;
+		
+		public BasicQueueImp(int capacity) {
+			this.capacity = capacity;
+			data = new ArrayList<>(capacity);
+		}
+		public boolean add(T val) {
+			if (length == capacity) {
+				return false;
+			}
+			int loc = (start + length) % capacity;
+			if (data.size() > loc) {
+				data.set(loc, val);
+			} else {
+				data.add(val);
+			}
+			length = length + 1;
+			return true;
+		}
+		public T remove() {
+			if (length == 0) {
+				throw new IllegalStateException("Queue empty");
+			}
+			T result = data.get(start);
+			// This avoids dangling references.
+			data.set(start, null);
+			start = (start + 1) % capacity;
+			length--;
+			return result;
+		}
+	}
+	
+	public static interface BlockingQueue<T> {
+		 void enqueue(T val) throws InterruptedException;
+		 public T dequeue() throws InterruptedException;
+	}
+	
+	// enqueue and dequeue do not block each other.
+	public static class LinkedBlockingQueue<T> implements BlockingQueue<T> {
+		private List<T> queue = new LinkedList<>();
+		private int capacity = 16;
+		LinkedBlockingQueue(int capacity) {
+			this.capacity = capacity;
+		}
+		@Override
+		public synchronized void enqueue(T val) throws InterruptedException {
+			while(queue.size() == capacity) {
+				wait();
+			}
+			if (queue.isEmpty()) {
+				notifyAll();
+			}
+			queue.add(val);
+		}
+		@Override
+		public synchronized T dequeue() throws InterruptedException {
+			while(queue.isEmpty()) {
+				wait();
+			}
+			if (queue.size() == capacity) {
+				notifyAll();
+			}
+			return queue.remove(0);
+		}
+	}
+	
+	// enqueue and dequeue do not block each other.
+	public static class ArrayBlockingQueue<T> implements BlockingQueue<T> {
+		private List<T> queue = new ArrayList<>();
+		private int capacity = 16;
+		ArrayBlockingQueue(int capacity) {
+			this.capacity = capacity;
+		}
+		@Override
+		public synchronized void enqueue(T val) throws InterruptedException {
+			while(queue.size() == capacity) {
+				wait();
+			}
+			if (queue.isEmpty()) {
+				notifyAll();
+			}
+			queue.add(val);
+		}
+		@Override
+		public synchronized T dequeue() throws InterruptedException {
+			while(queue.isEmpty()) {
+				wait();
+			}
+			if (queue.size() == capacity) {
+				notifyAll();
+			}
+			return queue.remove(0);
+		}
+	}
 	
 	public static void main(String[] args) {
 		// Test topN()
@@ -500,8 +610,50 @@ public class QueueImp {
 		Collection<Point2D> point2Ds = Arrays.asList(new Point2D(3,4), new Point2D(10,10), new Point2D(1,1), new Point2D(2,2));
 		System.out.println(findNearestPoints(point2Ds, new Point2D(1, 1), 2));
 		
-		System.out.println("---  Done test");
+		BasicQueue<Integer> q = new BasicQueueImp<>(5);
+		System.out.println("Adding 1 : " + q.add(1));
+		System.out.println("Adding 2 : " + q.add(2));
+		System.out.println("Adding 3 : " + q.add(3));
+		System.out.println("Adding 4 : " + q.add(4));
+		System.out.println("Adding 5 : " + q.add(5));
+		System.out.println("Adding 6 : " + q.add(6));
+		System.out.println("Removing 1 : " + q.remove());
+		System.out.println("Removing 2 : " + q.remove());
+		System.out.println("Removing 3 : " + q.remove());
+		System.out.println("Adding 6 : " + q.add(6));
+		System.out.println("Removing 4 : " + q.remove());
 		
+		BlockingQueue<Integer> bq = new LinkedBlockingQueue<>(3);
+		// 3 enqueue followed by mix of enqueue and dequeue operations
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for(int i = 0; i<5; i++) {
+					try {
+						System.out.println("Enqueing " + i);
+						bq.enqueue(i);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for(int i = 0; i<5; i++) {
+					try {
+						System.out.println("Dequeuing " + bq.dequeue());
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();	
+		
+		System.out.println("---  Done test");
 	}
 
 }

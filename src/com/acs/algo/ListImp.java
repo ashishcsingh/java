@@ -2,12 +2,16 @@ package com.acs.algo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 
 public class ListImp {
@@ -476,13 +480,73 @@ public class ListImp {
 	}
 	
 	/**
+	 * Returns the index of the biggest VM
+	 * @param vms
+	 * @return
+	 */
+	public static int biggestVm(Collection<Map<String, Float>> vms) {
+		if (vms == null || vms.size() == 0) {
+			throw new IllegalArgumentException();
+		}
+		float minCpu = vms.stream().min( (a, b) -> (int) (a.get("cpu") - b.get("cpu"))).get().get("cpu");
+		float minMem = vms.stream().min( (a, b) -> (int) (a.get("mem") - b.get("mem"))).get().get("mem");
+		int index = 0, curIndex = 0;
+		float biggest = 2;
+		for (Map<String, Float> vm : vms) {
+			float cur = vm.get("cpu") / minCpu + vm.get("mem") / minMem;
+			if (biggest < cur) {
+				biggest = cur;
+				index = curIndex;
+			}
+			curIndex++;
+		}
+		return index;
+	}
+
+	/**
 	 * data[x][y] == true then x follows y.
+	 * if this is false then y is not a influencer so skip y.
+	 * So complexity is linear.
 	 * Influencer is the one that is followed by everyone and does not follow anyone.
 	 * @param data
 	 * https://www.careercup.com/question?id=6482755168763904
 	 * @return
 	 */
 	public static int influencer(boolean[][] data) {
+		if (data == null) {
+			return -1;
+		}
+		boolean[] skipInfluencers = new boolean[data.length];
+		for(int i=0; i<data.length; i++) {
+			boolean isInfluencer = true;
+			if (skipInfluencers[i]) {
+				continue;
+			}
+			for (int j=0; j < data.length; j++) {
+				if (i == j) {
+					continue;
+				}
+				if (data[i][j] || !data[j][i]) {
+					isInfluencer = false;
+					skipInfluencers[i] = true;
+					break;
+				}
+			}
+			if (isInfluencer) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * data[x][y] == true then x follows y.
+	 * Influencer is the one that is followed by everyone and does not follow anyone.
+	 * @param data
+	 * https://www.careercup.com/question?id=6482755168763904
+	 * @return
+	 */
+	public static int influencerPoor(boolean[][] data) {
 		if (data == null) {
 			return -1;
 		}
@@ -579,6 +643,8 @@ public class ListImp {
 				{false, false, false}
 		};
 		assert influencer(influencerData) == 2;
+		
+		assert biggestVm(ImmutableList.of(ImmutableMap.of("cpu", 2.4f, "mem", 8.0f), ImmutableMap.of("cpu", 3.0f, "mem", 16.0f))) == 1;
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
