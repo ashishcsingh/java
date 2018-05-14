@@ -361,6 +361,30 @@ public class MapImp {
 			return false;
 		}
 	}
+	
+    public static int[] twoSumIndexes(int[] nums, int target) {
+        if (nums == null || nums.length == 0) {
+            return null;
+        }
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        int i = 0;
+        for (int num: nums) {
+            map.computeIfAbsent(num, k -> new ArrayList<>()).add(i++);
+        }
+        for (int num: nums) {
+            if (num == target - num) {
+                if (map.get(num).size() > 1) {
+                    return new int[] {map.get(num).get(0), map.get(num).get(1)};
+                } else {
+                    continue;
+                }
+            }
+            if (map.containsKey(target - num)) {
+                return new int[] {map.get(num).get(0), map.get(target - num).get(0)};
+            }
+        }
+        return null;
+    }
 
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
@@ -413,6 +437,10 @@ public class MapImp {
 				"singhashish37@gmail.com"), "ashish c singh", ImmutableList.<String>of("singhashish37@gmail.com"));
 		Map<String, Collection<String>> emailToContacts = reverseLookup(directory);
 		System.out.println(connectedContacts("ashish singh", directory, emailToContacts));
+		
+		int[] result = twoSumIndexes(new int[]{3,3}, 6);
+		assert(result[0] == 0);
+		assert(result[1] == 1);
 
 		// Two parts should exist.
 		TwoSum sums = new TwoSumImpl();

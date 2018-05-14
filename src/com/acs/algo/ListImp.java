@@ -1,9 +1,12 @@
 package com.acs.algo;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -517,23 +520,22 @@ public class ListImp {
 			return -1;
 		}
 		boolean[] skipInfluencers = new boolean[data.length];
-		for(int i=0; i<data.length; i++) {
-			boolean isInfluencer = true;
-			if (skipInfluencers[i]) {
+		for(int leader=0; leader<data.length; leader++) {
+			if (skipInfluencers[leader]) {
 				continue;
 			}
-			for (int j=0; j < data.length; j++) {
-				if (i == j) {
+			int follower = 0;
+			for (follower = 0; follower < data.length; follower++) {
+				if (leader == follower) {
 					continue;
 				}
-				if (data[i][j] || !data[j][i]) {
-					isInfluencer = false;
-					skipInfluencers[i] = true;
+				if (!data[follower][leader]) {
+					skipInfluencers[leader] = true;
 					break;
 				}
 			}
-			if (isInfluencer) {
-				return i;
+			if (follower == data.length) {
+				return leader;
 			}
 		}
 		return -1;
@@ -591,6 +593,58 @@ public class ListImp {
 			}
 		}
 		return c;
+	}
+	
+	/**
+	 * Tasks with time, after every task there is a forcedWait.
+	 * Compute max coverage possible after waiting forcedWait after every tasks.
+	 *    5 2 3 10, 5 -> 15
+	 * @param current
+	 * @param covered
+	 * @param forcedWait
+	 * @param leftWait
+	 * @return
+	 */
+	public static int maxCoverage(int[] tasks, int current, int forcedWait, int leftWait) {
+		if (current == tasks.length - 1) {
+			return tasks[current];
+		}
+		int result = 0;
+		if (leftWait == 0 && current + 2 < tasks.length) {
+			result = tasks[current] + maxCoverage(tasks, current + 2, forcedWait, Math.max(forcedWait - tasks[current + 1], 0));
+		}
+		if (current + 1 < tasks.length) {
+			result = Math.max(result, maxCoverage(tasks, current + 1, forcedWait, Math.max(leftWait - tasks[current], 0)));
+		}
+		return result;
+	}
+	
+	public static int maxCoverage2(int[] tasks, int current, int forcedWait, int leftWait, Map<Integer, Integer> cache, Deque<Integer> selection) {
+		if (current == tasks.length - 1) {
+			selection.push(tasks[current]);
+			cache.put(current, tasks[current]);
+			return tasks[current];
+		}
+		if (cache.get(current) != null) {
+			return cache.get(current);
+		}
+		int result = 0;
+		if (leftWait == 0 && current + 2 < tasks.length) {
+			selection.push(tasks[current]);
+			result = tasks[current] + maxCoverage2(tasks, current + 2, forcedWait, Math.max(forcedWait - tasks[current + 1], 0), cache, selection);
+		}
+		if (current + 1 < tasks.length) {
+			int temp = maxCoverage2(tasks, current + 1, forcedWait, Math.max(leftWait - tasks[current], 0), cache, selection);
+			if (temp > result) {
+				// If skipping was better.
+				if (result != 0) {
+					selection.pop();
+				}
+				result = temp;
+			}
+		}
+		cache.put(current, result);
+		return result;
 	}
 	
 	public static void main(String[] args) {
@@ -675,6 +729,15 @@ public class ListImp {
 		int b[] = {1, 2, 3};
 		int c[] = sumTwoArrays(a, b);
 		System.out.println(Arrays.toString(c));
+		
+		assert maxCoverage(new int[] {5, 2, 3, 10}, 0, 5, 0) == 15;
+		
+		// Dynamic with path capture.
+		Deque<Integer> selection = new ArrayDeque<>();
+		Map<Integer, Integer> map = new HashMap<>();
+		assert maxCoverage2(new int[] {5, 2, 3, 10}, 0, 5, 0, map, selection) == 15;
+		
+		System.out.println(selection);
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");
