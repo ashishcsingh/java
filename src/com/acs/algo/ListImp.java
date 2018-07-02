@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,16 +20,11 @@ import com.google.common.primitives.Ints;
 
 public class ListImp {
 	public static int[] arrayUnique(int[] data) {
-		Set<Integer> set = new TreeSet<Integer>();
+		Set<Integer> set = new HashSet<>();
 		for (Integer i : data) {
 			set.add(i);
 		}
-		int[] result = new int[set.size()];
-		int i = 0;
-		for (int v : set) {
-			result[i++] = v;
-		}
-		return result;
+		return set.stream().mapToInt(i -> i).toArray();
 	}
 
 	public static int percentileVal(int[] data, double percentile) {
@@ -647,6 +643,78 @@ public class ListImp {
 		return result;
 	}
 	
+	/**
+	 * Given data compute max sum of sub sequence, using tabulation.
+	 * @param d
+	 * @return
+	 */
+	public static int maxSumSubSequence(int[] d) {
+		int[] sum = new int[d.length];
+		for (int i = 0; i < d.length; i++) {
+			sum[i] = d[i];
+		}
+		for (int i = 1; i < d.length; i++) {
+			for (int j = 0; j < i; j++) {
+				if (d[j] < d[i] && sum[i] < sum[j] + d[i]) {
+					sum[i] = sum[j] + d[i];
+				}
+			}
+		}
+		int max = Integer.MIN_VALUE;
+		for (int i = 0; i < sum.length; i++) {
+			max = Math.max(max, sum[i]);
+		}
+		return max;
+	}
+	
+	/**
+	 * Using tabulation compute the max profit of cutting rod.
+	 * @param d
+	 * @param len
+	 * @param cache
+	 * @return
+	 */
+	public static int maxProfitCutting(int[] d, int len, Map<Integer, Integer> cache) {
+		if (len == 1) {
+			return d[0];
+		}
+		if (len < 0) {
+			return 0;
+		}
+		if (cache.containsKey(len)) {
+			return cache.get(len);
+		}
+		int profit = d[0];
+		for (int i = 1; i < d.length; i++) {
+			profit = Math.max(profit, d[i] + maxProfitCutting(d, len - i - 1, cache));
+		}
+		cache.put(len, profit);
+		return profit;
+	}
+	
+	/**
+	 * Returns indices of elems with matching sum.
+	 * @param arr
+	 * @param sum
+	 * @return
+	 */
+	public static int[] maxSumSubArray(int[] arr, int sum) {
+		int cur = 0, left = 0, right = 0;
+		while(right < arr.length) {
+			while (right < arr.length && cur < sum) {
+				cur += arr[right++];
+			}
+			if (cur == sum) {
+				return new int[] {left, right - 1};
+			}
+			while (left < right && cur > sum) {
+				cur -= arr[left++];
+			}
+		}
+		return null;
+	}
+	
+	
 	public static void main(String[] args) {
 		// Test arrayUnique()
 		System.out.println("Start: Test list puzzles");
@@ -737,7 +805,10 @@ public class ListImp {
 		Map<Integer, Integer> map = new HashMap<>();
 		assert maxCoverage2(new int[] {5, 2, 3, 10}, 0, 5, 0, map, selection) == 15;
 		
-		System.out.println(selection);
+		assert maxSumSubSequence(new int[]{1,5,3,7,5,6,7}) == 22;
+		assert maxProfitCutting(new int[]{1, 3, 5, 6}, 8, new HashMap<>()) ==  19;
+		
+		System.out.println("maxSumSubArray" + Arrays.toString(maxSumSubArray(new int[]{1, 3, 5, 2, 5, 4}, 12)));
 		
 		// No assert failure means all work fine.
 		System.out.println("Finish: Test list puzzles.");

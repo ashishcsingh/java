@@ -486,6 +486,38 @@ public class QueueImp {
 			return result;
 		}
 	}
+	
+	/**
+	 * Simple Queue using array
+	 * @author asingh
+	 *
+	 */
+	public static class SimpleQueue<T> {
+		private int length;
+		private int start;
+		private Object[] data;
+		public SimpleQueue(int capacity) {
+			data = new Object[capacity];
+		}
+		public boolean add(T val) {
+			if (length == data.length) {
+				return false;
+			}
+			data[(start + length) % data.length] = val;
+			length++;
+			return true;
+		}
+		public T remove() {
+			if (length == 0) {
+				return null;
+			}
+			T result = (T) data[start];
+			data[start] = null;
+			start = (start + 1) % data.length;
+			length--;
+			return result;
+		}
+	}
 
 	public static interface BlockingQueue<T> {
 		void enqueue(T val) throws InterruptedException;
@@ -665,6 +697,18 @@ public class QueueImp {
 				}
 			}
 		}).start();
+		
+		SimpleQueue<Integer> sq = new SimpleQueue<>(5);
+		sq.add(1);
+		sq.add(2);
+		sq.add(3);
+		assert sq.add(4) == true;
+		assert sq.add(5) == true;
+		assert sq.add(6) == false;
+		assert sq.remove() == 1;
+		assert sq.add(6) == true;
+		
+		
 
 		System.out.println("---  Done test");
 	}

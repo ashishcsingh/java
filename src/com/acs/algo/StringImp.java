@@ -872,6 +872,86 @@ public class StringImp {
 		return min;
 	}
 	
+	
+	/**
+	 * Find max length of Palindome sub sequence.
+	 * 
+	 * Using dynamic programming via memoization.
+	 * @param str
+	 * @param left
+	 * @param right
+	 * @param cache
+	 * @return
+	 */
+	public static int maxLenPalindromSubSequence(String str, int left, int right, int[][] cache) {
+		if (cache[left][right] != 0) {
+			return cache[left][right];
+		}
+		if (left > right) {
+			return 0;
+		}
+		if (left == right) {
+			cache[left][right] = 1;
+			return cache[left][right];
+		}
+		if (left == right - 1 && str.charAt(left) == str.charAt(right)) {
+			cache[left][right] = 2;
+			return cache[left][right];
+		}
+		if (str.charAt(left) != str.charAt(right)) {
+			cache[left][right] = Math.max(maxLenPalindromSubSequence(str, left, right - 1, cache),
+					maxLenPalindromSubSequence(str, left + 1, right, cache));
+			return cache[left][right];
+		}
+		if (str.charAt(left) == str.charAt(right)) {
+			cache[left][right] = maxLenPalindromSubSequence(str, left + 1, right - 1, cache) + 2;
+			return cache[left][right];
+		}
+		throw new IllegalStateException();
+	}
+	
+	private static boolean matchedMap(Map<Character, Integer> tMap, Map<Character, Integer> sMap) {
+		for (Map.Entry<Character, Integer> e : tMap.entrySet()) {
+			if (!sMap.containsKey(e.getKey()) || sMap.get(e.getKey()) < e.getValue()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * return smallest string in s that has all characters of t.
+	 * @param s
+	 * @param t
+	 * @return
+	 */
+	public static String minSubSequence(String s, String t) {
+		Map<Character, Integer> tMap = new HashMap<>();
+		Map<Character, Integer> sMap = new HashMap<>();
+		for (Character c: t.toCharArray()) {
+			tMap.put(c, tMap.getOrDefault(c, 0) + 1);
+		}
+		int start = 0;
+		String minString = "";
+		int min = Integer.MAX_VALUE;
+		for (int end = 0; end < s.length(); end++) {
+			if (end < s.length() && !matchedMap(tMap, sMap)) {
+				Character c = s.charAt(end);
+				sMap.put(c, sMap.getOrDefault(c, 0) + 1);
+			}
+			if (matchedMap(tMap, sMap) && min > end - start) {
+				min = end - start;
+				// start might have not been initialized in the shrinking stage.
+				minString = s.substring(start < 1 ? 0 : start - 1, end);
+			}
+			while (start < end && matchedMap(tMap, sMap)) {
+				Character c = s.charAt(start++);
+				sMap.put(c, sMap.getOrDefault(c, 0) - 1);
+			}
+		}
+		return minString;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -979,6 +1059,11 @@ public class StringImp {
         assert minDistanceWords("world hello super man and woman welcome man to world", "man", "world") == 2;
         
         assert convertToDigit("jab").equals("012");
+        
+        assert maxLenPalindromSubSequence("supuspp", 0, 6, new int[7][7]) == 5;
+        
+        System.out.println("minSubSequence " + minSubSequence("abdcdfadca", "ac"));
+        assert minSubSequence("abdcdfadca", "ac").equals("adc");
         
 		System.out.println("Done: Testing String related puzzles");
 	}
