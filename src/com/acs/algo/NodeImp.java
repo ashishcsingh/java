@@ -38,6 +38,32 @@ public class NodeImp {
 		}
 	}
 	
+	public static boolean isBST(Node root) {
+		if (root == null) {
+			return true;
+		}
+		if (root.left != null && root.data < root.left.data) {
+			return false;
+		}
+		if (root.right != null && root.data > root.right.data) {
+			return false;
+		}
+		return isBST(root.left) && isBST(root.right);
+	}
+	
+	public static int maxBST(Node root) {
+		if (root == null) {
+			return 0;
+		}
+		int ls = maxBST(root.left);
+		int rs = maxBST(root.right);
+		if (isBST(root)) {
+			return ls + rs + 1;
+		} else {
+			return Math.max(ls, rs);
+		}
+	}
+	
 	/**
 	 * Node with Inorder iterators.
 	 * @author asingh
@@ -1334,6 +1360,10 @@ public class NodeImp {
 		n225.left = new Node(new Node(2), new Node(3), 2);
 		n225.right = new Node(new Node(5), new Node(10), 5);
 		assert secondSmallest(n225) == 3;
+		
+	   Node n123 = new Node(new Node(1), new Node(3), 2);
+	   assert isBST(n123);
+	   assert maxBST(n123) == 3;
 	
        NodeWithParent n1Parent = new NodeWithParent(1);
        n1Parent.left = new NodeWithParent(2);
