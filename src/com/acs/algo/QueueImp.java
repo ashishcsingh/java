@@ -7,14 +7,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class QueueImp {
 
@@ -100,6 +103,38 @@ public class QueueImp {
 		}
 		return output;
 	}
+	
+    static class Pair {
+        int val;
+        int freq;
+        Pair(int val, int freq) {
+            this.val = val;
+            this.freq = freq;
+        }
+    }
+    
+    /**
+     * Get top frequent value.
+     * @param nums
+     * @param k
+     * @return
+     */
+    public static List<Integer> topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> freqMap = new HashMap<>();
+        for (int n : nums) {
+            freqMap.put(n, freqMap.getOrDefault(n, 0) + 1);
+        }
+        Queue<Pair> pq = new PriorityQueue<>(k + 1, (p1, p2) -> p1.freq - p2.freq);
+        for (Map.Entry<Integer, Integer> e : freqMap.entrySet()) {
+            if (pq.size() < k) {
+                pq.offer(new Pair(e.getKey(), e.getValue()));
+            } else {
+                pq.offer(new Pair(e.getKey(), e.getValue()));
+                pq.poll();
+            }
+        }
+        return pq.stream().map(p -> p.val).sorted().collect(Collectors.toList());
+    }
 
 	public static class Point implements Comparable<Point> {
 		private int x, y, z;
@@ -708,7 +743,7 @@ public class QueueImp {
 		assert sq.remove() == 1;
 		assert sq.add(6) == true;
 		
-		
+		System.out.println(topKFrequent(new int[] {1,1,2,1,1,2,2,3}, 2)); 
 
 		System.out.println("---  Done test");
 	}

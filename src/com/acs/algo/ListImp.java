@@ -33,6 +33,60 @@ public class ListImp {
 		}
 		return data[(int) (Math.ceil(percentile * (data.length - 1)))];
 	}
+	
+	/**
+	 * Matrix must be square.
+	 *						  ' 
+	 *      -----           ' '
+	 *       ---    ==>   ' ' '
+	 *        - 			' '
+	 *        				  '
+	 *        
+	 * @param data
+	 */
+	public static void rotateMatrix(int[][] data) {
+		int N = data.length;
+		for (int x = 0; x < N / 2; x++) {
+			for (int y = x; y < N - 1 - x; y++) {
+				int tmp = data[x][y];
+				data[x][y] = data[y][N-1-x];
+				data[y][N-1-x] = data[N-1-x][N-1-y];
+				data[N-1-x][N-1-y] = data[N-1-y][x];
+				data[N-1-y][x] = tmp;
+			}
+		}
+	}
+
+	
+	/**
+	 * Populate matrix 
+	 * @param size
+	 * @return
+	 */
+	public static int[][] populateMatrix(int size) {
+		int[][] data = new int[size][size];
+		int k = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				data[i][j] = ++k;
+			}
+		}
+		return data;
+	}
+	
+	/**
+	 * Print matrix.
+	 * @param data
+	 */
+	public static void printMatrix(int[][] data) {
+		System.out.println("Printing matrix : ");
+		for (int[] r : data) {
+			for (int c: r) {
+				System.out.print(c + " ");
+			}
+			System.out.println();
+		}
+	}
 
 	/**
 	 * arr: 1...N Finds missing number by computing sum and substracting from n
@@ -714,6 +768,68 @@ public class ListImp {
 		return null;
 	}
 	
+    private static boolean searchMatrixHelper(int[][] matrix, int target, int x, int y, boolean[][] cache) {
+        if (x == matrix.length || y == matrix[0].length) {
+            return false;
+        }
+        if (matrix[x][y] == target) {
+            return true;
+        }
+        if (matrix[x][y] > target) {
+            return false;
+        }
+        if (cache[x][y]) {
+            return false;
+        }
+        cache[x][y] = true;
+        return searchMatrixHelper(matrix, target, x + 1, y, cache) || searchMatrixHelper(matrix, target, x, y + 1, cache);
+    }
+    
+  
+    /**
+     * 
+     * @param matrix
+     * @param target
+     * @return
+     */
+    public static boolean searchMatrix(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0) {
+            return false;
+        }
+        return searchMatrixHelper(matrix, target, 0, 0, new boolean[matrix.length][matrix[0].length]);
+    }
+    
+    public static class Node {
+    	int val;
+    	Node next;
+    	Node(int val, Node next) {
+    		this.val = val;
+    		this.next = next;
+    	}
+    	Node () {}
+    }
+    
+    private static Node reverseList(Node n, int range) {
+    	Node head = n, prev = null, next = n;
+    	for (int i = 0; i < range; i++) {
+    		next = n.next;
+    		n.next = prev;
+    		prev = n;
+    		n = next;
+    	}
+    	head.next = n;
+    	return prev;
+    }
+    
+    public static Node reverseList(Node n, int left, int right) {
+    	Node head = n;
+    	for (int i = 0; i < left - 2; i++) {
+    		n = n.next;
+    	}
+    	n.next = reverseList(n.next, right - left);
+    	return head;
+    }
+    
 	
 	public static void main(String[] args) {
 		// Test arrayUnique()
@@ -810,7 +926,33 @@ public class ListImp {
 		
 		System.out.println("maxSumSubArray" + Arrays.toString(maxSumSubArray(new int[]{1, 3, 5, 2, 5, 4}, 12)));
 		
+		int[][] matrix = populateMatrix(3);
+		System.out.println("Before rotation ");
+		printMatrix(matrix);
+		
+		assert searchMatrix(matrix, 7);
+		assert !searchMatrix(matrix, 10);
+		
+		rotateMatrix(matrix);
+		System.out.println("After rotation ");
+		printMatrix(matrix);
+		
+		// 1->2->3->4
+		Node head = new Node(1, new Node(2, new Node(3, new Node(4, new Node(5, null)))));
+		Node n = head;
+		System.out.println("Before reversing from 2-3 range");
+		for (; n != null; n = n.next) {
+			System.out.print(n.val + " ");
+		}
+		n = head;
+		reverseList(n, 2, 4);
+		System.out.println("\nAfter reversing from 2-3 range");
+		n = head;
+		for (; n != null; n = n.next) {
+			System.out.print(n.val + " ");
+		}
+		
 		// No assert failure means all work fine.
-		System.out.println("Finish: Test list puzzles.");
+		System.out.println("\nFinish: Test list puzzles.");
 	}
 }

@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.acs.algo.SetImp.Summable;
 import com.acs.algo.SetImp.SummableImpl;
@@ -385,6 +387,21 @@ public class MapImp {
         }
         return null;
     }
+    
+	/**
+	 * Get rank
+	 * @param rankMap
+	 * @param score
+	 * @return
+	 */
+	public static int getRank(SortedMap<Integer, Integer> rankMap, int score) {
+		int rank = 0;
+		rankMap.put(score, rankMap.getOrDefault(score, 0) + 1);
+		for (Map.Entry<Integer, Integer> entry : rankMap.headMap(score).entrySet()) {
+			rank += entry.getValue();
+		}
+		return rank + 1;
+	}
 
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
@@ -451,6 +468,11 @@ public class MapImp {
 		assert !sums.test(8);
 		assert sums.test(9);
 		assert sums.test(10);
+		
+		SortedMap<Integer, Integer> rankMap = new TreeMap<>();
+		rankMap.put(900, 1);
+		rankMap.put(700, 1);
+		assert getRank(rankMap, 800) == 2;
 
 		System.out.println("Done: Testing puzzles with Hashmaps");
 

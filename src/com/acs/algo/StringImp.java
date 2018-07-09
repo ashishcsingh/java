@@ -1,7 +1,9 @@
 package com.acs.algo;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,9 +11,59 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.codehaus.groovy.util.StringUtil;
+
 import com.google.common.collect.ImmutableList;
 
+import groovyjarjarantlr.StringUtils;
+
 public class StringImp {
+	
+	/**
+	 * Input string with 
+	 * @param str
+	 * @return
+	 */
+	public static boolean balanceBraces(String str) {
+		if (str == null || str.equals("")) {
+			return true;
+		}
+		Deque<Character> stack = new ArrayDeque<>();
+		for (char c : str.toCharArray()) {
+			if (c == '{' || c == '[' || c == '(') {
+				stack.push(c);
+			}
+			if (c == '}' || c == ']' || c == ')') {
+				if (stack.isEmpty()) {
+					return false;
+				}
+				char c1 = stack.pop();
+				if (!matchingBrace(c1, c)) {
+					return false;
+				}
+			}
+		}
+		if (!stack.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
+	
+	private static boolean matchingBrace(char c1, char c2) {
+		if (c1 == '{' && c2 == '}') {
+			return true;
+		}
+		if (c1 == '[' && c2 == ']') {
+			return true;
+		}
+		if (c1 == '(' && c2 == ')') {
+			return true;
+		}
+		if (c1 == '"' && c2 == '"') {
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * a+b* validates aaab, aaabbbbb, a
@@ -919,6 +971,22 @@ public class StringImp {
 		return true;
 	}
 	
+    public static int lengthOfLongestSubstring(String s) {
+        if (s.length() == 0) {
+            return 0;
+        }
+        Map<Character, Integer> map = new HashMap<>();
+        int max = 0;
+        for (int left = 0, right = 0; right < s.length(); right++) {
+            if (map.containsKey(s.charAt(right))) {
+                left = Math.max(left, map.get(s.charAt(right)) + 1);
+            }
+            map.put(s.charAt(right), right);
+            max = Math.max(max, right - left + 1);
+        }
+        return max;
+    }
+	
 	/**
 	 * return smallest string in s that has all characters of t.
 	 * @param s
@@ -1064,6 +1132,11 @@ public class StringImp {
         
         System.out.println("minSubSequence " + minSubSequence("abdcdfadca", "ac"));
         assert minSubSequence("abdcdfadca", "ac").equals("adc");
+        
+        assert balanceBraces("(){}[[{()}]]");
+        assert !balanceBraces("()}[[{()}]]");
+        
+        assert lengthOfLongestSubstring("abcadaac") == 4;
         
 		System.out.println("Done: Testing String related puzzles");
 	}

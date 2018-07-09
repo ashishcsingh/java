@@ -1129,6 +1129,40 @@ public class NodeImp {
 		return root;
 	}
 	
+	static class Point {
+		int x;
+		int y;
+		Point(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		Point() {}
+		public String toString() {
+			return "x : " + x + " y : " + y;
+		}
+	}
+	
+	/**
+	 * Track water path, scene[][] contains height of different objects.
+	 * @param scene
+	 * @param point
+	 * @param result
+	 * @param tmpPath
+	 */
+	public static void waterPath(int[][] scene, int prevHeight, Point point, List<Point> tmpPath, List<List<Point>> result) {
+		if (point.x >= scene.length || point.y < 0 || point.y >= scene[0].length || scene[point.x][point.y] > prevHeight) {
+			result.add(new ArrayList<>(tmpPath));
+			return;
+		}
+		if (scene[point.x][point.y] <= prevHeight) {
+			tmpPath.add(point);
+			waterPath(scene, scene[point.x][point.y], new Point(point.x + 1, point.y - 1), tmpPath, result);
+			waterPath(scene, scene[point.x][point.y], new Point(point.x + 1, point.y), tmpPath, result);
+			waterPath(scene, scene[point.x][point.y], new Point(point.x + 1, point.y + 1), tmpPath, result);
+			tmpPath.remove(tmpPath.size() - 1);
+		}
+	}
+	
 	/**
 	 * Tester methods.
 	 * @param args
@@ -1332,6 +1366,16 @@ public class NodeImp {
        assert flippedNode.data == 5;
        assert flippedNode.left.data == 6;
        assert flippedNode.right.data == 4;
+      
+       int[][] scene = new int[][] {
+    	   {0, 5, 0, 0},
+    	   {2, 6, 3, 0},
+    	   {1, 2, 3, 0},
+    	   {1, 1, 1, 1},
+       };
+       List<List<Point>> paths = new ArrayList<>();
+       waterPath(scene, 10, new Point(0, 1), new ArrayList<>(), paths);
+       paths.forEach(System.out::println);
        
 		System.out.println();
 		// Means no assert failure.
