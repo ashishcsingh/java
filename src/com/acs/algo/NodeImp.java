@@ -62,11 +62,7 @@ public class NodeImp {
 		// Explore and connect left doubly list. 
 		if (node.left != null) {
 			Node leftHead = buildDoubly(node.left);
-			// Find left side's end.
-			Node leftEnd = leftHead.right;
-			while (leftEnd.right != leftHead) {
-				leftEnd = leftEnd.right;
-			}
+			Node leftEnd = leftHead.left;
 			// Current node is after left side doubly list.
 			node.left = leftEnd;
 			leftEnd.right = node;
@@ -74,14 +70,11 @@ public class NodeImp {
 		}
 		// Explore and connect right doubly list. 
 		if (node.right != null) {
-			// Current node is before right side doubly list.
 			Node rightHead = buildDoubly(node.right);
+			Node rightEnd = rightHead.left;
+			// Current node is before right side doubly list.
 			node.right = rightHead;
 			rightHead.left = node;
-			Node rightEnd = rightHead.right;
-			while (rightEnd.right != rightHead) {
-				rightEnd = rightEnd.right;
-			}
 			end = rightEnd;
 		}
 		head.left = end;
