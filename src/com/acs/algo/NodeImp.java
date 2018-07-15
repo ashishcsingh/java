@@ -36,6 +36,57 @@ public class NodeImp {
 			right = r;
 			data = d;
 		}
+		public Node(int d, Node l, Node r) {
+			left = l;
+			right = r;
+			data = d;
+		}
+	}
+	
+	/**
+	 * TreeNode to doudbly linkedlist.
+	 * left -> prev
+	 * right -> next.
+	 * Last node's next points to first.
+	 * First node's prev points to last.
+	 * @param tree node
+	 * @return doubly node
+	 */
+	public static Node buildDoubly(Node node) {
+		// When null then return null.
+		if (node == null) {
+			return null;
+		}
+		Node head = node;
+		Node end = node;
+		// Explore and connect left doubly list. 
+		if (node.left != null) {
+			Node leftHead = buildDoubly(node.left);
+			// Find left side's end.
+			Node leftEnd = leftHead.right;
+			while (leftEnd.right != leftHead) {
+				leftEnd = leftEnd.right;
+			}
+			// Current node is after left side doubly list.
+			node.left = leftEnd;
+			leftEnd.right = node;
+			head = leftHead;
+		}
+		// Explore and connect right doubly list. 
+		if (node.right != null) {
+			// Current node is before right side doubly list.
+			Node rightHead = buildDoubly(node.right);
+			node.right = rightHead;
+			rightHead.left = node;
+			Node rightEnd = rightHead.right;
+			while (rightEnd.right != rightHead) {
+				rightEnd = rightEnd.right;
+			}
+			end = rightEnd;
+		}
+		head.left = end;
+		end.right = head;
+		return head;
 	}
 	
 	public static boolean isBST(Node root) {
@@ -1168,6 +1219,7 @@ public class NodeImp {
 		}
 	}
 	
+	
 	/**
 	 * Track water path, scene[][] contains height of different objects.
 	 * @param scene
@@ -1331,6 +1383,45 @@ public class NodeImp {
 		while(itr.hasNext()) {
 			System.out.print(itr.next() + ", ");
 		}
+		
+		Node node12345 = new Node(new Node(null, null, 2), new Node(null, null, 4), 3);
+		node12345.left.left = new Node(1);
+		node12345.right.right = new Node(5);
+		assert node12345.data == 3;
+		assert node12345.left.data == 2;
+		assert node12345.left.left.data == 1;
+		assert node12345.right.data == 4;
+		assert node12345.right.right.data == 5;
+		Node doublyNode = buildDoubly(node12345);
+		Node tempNode = doublyNode.right;
+		System.out.println("Print list");
+		System.out.print(doublyNode.data + ", ");
+		System.out.print(doublyNode.right.data + ", ");
+		while (tempNode.right != doublyNode) {
+			tempNode = tempNode.right;
+			System.out.print(tempNode.data + ", ");
+		}
+		
+		tempNode = doublyNode.left;
+		System.out.println("Print list reverse");
+		System.out.print(doublyNode.data + ", ");
+		System.out.print(doublyNode.left.data + ", ");
+		while (tempNode.left != doublyNode) {
+			tempNode = tempNode.left;
+			System.out.print(tempNode.data + ", ");
+		}
+		
+		assert doublyNode.data == 1;
+		assert doublyNode.right.data == 2;
+		assert doublyNode.right.right.data == 3;
+		assert doublyNode.right.right.right.data == 4;
+		assert doublyNode.right.right.right.right.data == 5;
+		assert doublyNode.right.right.right.right.right.data == 1;
+		assert doublyNode.right.right.right.right.right.right.data == 2;
+		assert doublyNode.left.data == 5;
+		assert doublyNode.right.left.data == 1;
+		assert doublyNode.right.right.left.data == 2;
+		assert doublyNode.right.right.right.left.data == 3;
 	
 		/**
 		 * 						6
@@ -1408,6 +1499,7 @@ public class NodeImp {
        paths.forEach(System.out::println);
        
 		System.out.println();
+		
 		// Means no assert failure.
 		System.out.println("Done: Testing Graph related puzzles");
 	}

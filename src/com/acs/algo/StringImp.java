@@ -1020,6 +1020,61 @@ public class StringImp {
 		return minString;
 	}
 	
+	/**
+	 * Given a graph of vertices (a,b,c,d) and edges ( (a,b), (b,c), (c,d))
+	 * Return an ordered vertices such that it includes all the vertices
+	 * without any conflicting order.
+	 * @param nodes
+	 * @param edges
+	 * @return
+	 */
+	public static String orderedVertices(char[] nodes, char[][] edges) {
+		Map<Character, Integer> inbound = new HashMap<>();
+		Map<Character, List<Character>> conn = new HashMap<>();
+		for (char[] edge : edges) {
+			inbound.put(edge[1], inbound.getOrDefault(edge[1], 0) + 1);
+		}
+		for (char[] edge : edges) {
+			conn.computeIfAbsent(edge[0], k -> new ArrayList<>()).add(edge[1]);
+		}
+		Set<Character> result = new HashSet<>();
+		while (result.size() < nodes.length) {
+			for (Map.Entry<Character, Integer> e: inbound.entrySet()) {
+				if (result.contains(e.getKey())) {
+					continue;
+				}
+				if (e.getValue() == 0) {
+					result.add(e.getKey());
+				}
+				for (char c : conn.get(e.getKey())) {
+					inbound.put(e.getKey(), e.getValue() == 0 ? 0 : e.getValue() - 1);
+				}
+			}
+		}
+		return String.valueOf(result.toArray());
+	}
+	
+	public static int countPalindrome(char[] s) {
+		int count = 0;
+		for (int k = 0; k < s.length; k++) {
+			for (int i = 0; i < s.length; i++) {
+				if (i + k < s.length && isPalindrome(s, i, i + k)) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+	
+	public static boolean isPalindrome(char[] s, int left, int right) {
+		while(left < right) {
+			if (s[left++] != s[right--]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Start: Testing String related puzzles");
 		System.out.println("Testing countWords()");
@@ -1137,6 +1192,8 @@ public class StringImp {
         assert !balanceBraces("()}[[{()}]]");
         
         assert lengthOfLongestSubstring("abcadaac") == 4;
+        
+        assert countPalindrome("naman".toCharArray()) == 7;
         
 		System.out.println("Done: Testing String related puzzles");
 	}
